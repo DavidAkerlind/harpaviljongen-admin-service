@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback } from 'react';
-import { api } from '../services/apiService';
+import { api } from '../services/apiService.js';
 
 const MenuContext = createContext(null);
 

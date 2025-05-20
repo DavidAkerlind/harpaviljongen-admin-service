@@ -20,6 +20,7 @@ export const ItemEditor = () => {
 		description: '',
 		price: '',
 		active: true,
+		producer: '',
 	});
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
@@ -60,6 +61,17 @@ export const ItemEditor = () => {
 						item.description
 					),
 					api.updateMenuItem(menuId, itemId, 'price', item.price),
+					// Update producer if it's a wine menu
+					...(menuType === 'wine'
+						? [
+								api.updateMenuItem(
+									menuId,
+									itemId,
+									'producer',
+									item.producer
+								),
+						  ]
+						: []),
 				]);
 			} else {
 				// Create new item
@@ -77,7 +89,9 @@ export const ItemEditor = () => {
 		<Container maxWidth="md">
 			<Paper sx={{ p: 3, mt: 3 }}>
 				<Typography variant="h5" gutterBottom>
-					{itemId ? 'Edit Item' : 'New Item'}
+					{itemId
+						? `Edit Item in '${menuId}'`
+						: `New Item in '${menuId}'`}
 				</Typography>
 
 				{error && (
@@ -109,6 +123,18 @@ export const ItemEditor = () => {
 						multiline
 						rows={3}
 					/>
+					{/* Show producer field only for wine menus */}
+					{menuId === 'menu-wine' && (
+						<TextField
+							fullWidth
+							label="Producer"
+							value={item.producer || ''}
+							onChange={(e) =>
+								setItem({ ...item, producer: e.target.value })
+							}
+							margin="normal"
+						/>
+					)}
 
 					<TextField
 						fullWidth

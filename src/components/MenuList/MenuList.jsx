@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
 	List,
 	ListItem,
@@ -6,8 +7,9 @@ import {
 	IconButton,
 	Paper,
 	Typography,
+	Button,
 } from '@mui/material';
-import { Delete, Edit } from '@mui/icons-material';
+import { Add, Delete, Edit } from '@mui/icons-material';
 import { api } from '../../services/apiService';
 
 export const MenuList = () => {
@@ -42,6 +44,15 @@ export const MenuList = () => {
 			<Typography variant="h5" gutterBottom>
 				Menus
 			</Typography>
+
+			<Button
+				variant="contained"
+				startIcon={<Add />}
+				component={Link}
+				to="/menu/new">
+				Add menu
+			</Button>
+
 			<List>
 				{menus.map((menu) => (
 					<ListItem

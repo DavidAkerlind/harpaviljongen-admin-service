@@ -6,13 +6,16 @@ export const Navbar = () => {
 		<AppBar position="static">
 			<Toolbar>
 				<Typography variant="h6" sx={{ flexGrow: 1 }}>
-					Harpaviljongen Admin
+					HAS
 				</Typography>
 				<Button color="inherit" component={Link} to="/">
-					Menus
+					Dashboard
 				</Button>
 				<Button color="inherit" component={Link} to="/search">
 					Search
+				</Button>
+				<Button color="inherit" component={Link} to="/menus">
+					Edit Menus
 				</Button>
 			</Toolbar>
 		</AppBar>

@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
-import { MenuProvider } from './contexts/MenuContext';
+import { MenuProvider } from './contexts/MenuContext.jsx';
 import { theme } from './utils/theme';
 import { Navbar } from './components/Navbar/Navbar';
 import { MenuList } from './components/MenuList/MenuList';

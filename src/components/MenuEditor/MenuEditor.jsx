@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
 	Container,
 	Paper,
@@ -9,6 +9,7 @@ import {
 	Box,
 	MenuItem,
 } from '@mui/material';
+import { Add, Delete, Edit } from '@mui/icons-material';
 import { api } from '../../services/apiService';
 
 export const MenuEditor = () => {
@@ -138,6 +139,13 @@ export const MenuEditor = () => {
 							</MenuItem>
 						))}
 					</TextField>
+					<Button
+						variant="contained"
+						startIcon={<Edit />}
+						component={Link}
+						to="/menu/new">
+						Edit items in this menu
+					</Button>
 
 					<Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
 						<Button
