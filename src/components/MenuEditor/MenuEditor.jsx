@@ -29,6 +29,7 @@ export const MenuEditor = () => {
 		'wine',
 		'lunch',
 		'sweets',
+		'small',
 		'small snack',
 		'small bubbels',
 		'small cocktails',
@@ -143,7 +144,7 @@ export const MenuEditor = () => {
 						variant="contained"
 						startIcon={<Edit />}
 						component={Link}
-						to="/menu/new">
+						to={`/menu/${menuId}/items/new`}>
 						Edit items in this menu
 					</Button>
 

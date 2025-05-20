@@ -5,7 +5,12 @@ export const Navbar = () => {
 	return (
 		<AppBar position="static">
 			<Toolbar>
-				<Typography variant="h6" sx={{ flexGrow: 1 }}>
+				<Typography
+					color="inherit"
+					component={Link}
+					to={'/'}
+					variant="h6"
+					sx={{ flexGrow: 1 }}>
 					HAS
 				</Typography>
 				<Button color="inherit" component={Link} to="/">
