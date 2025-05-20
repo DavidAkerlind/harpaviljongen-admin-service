@@ -52,16 +52,29 @@ export const DashboardPage = () => {
 	const checkSystemStatus = async () => {
 		try {
 			const start = Date.now();
-			await api.getAllMenus();
+			const response = await api.getAllMenus();
 			const apiLatency = Date.now() - start;
 			setSystemStatus((prev) => ({
-				...prev,
-				api: { status: 'healthy', latency: apiLatency },
+				api: {
+					status: 'healthy',
+					latency: apiLatency,
+				},
+				database: {
+					status: response.data ? 'healthy' : 'error',
+					latency: apiLatency,
+				},
 			}));
 		} catch (error) {
+			// If there's an error, both services might be down
 			setSystemStatus((prev) => ({
-				...prev,
-				api: { status: 'error', latency: 0 },
+				api: {
+					status: 'error',
+					latency: 0,
+				},
+				database: {
+					status: 'error',
+					latency: 0,
+				},
 			}));
 		}
 	};
@@ -150,7 +163,13 @@ export const DashboardPage = () => {
 				</Tooltip>
 			</Box>
 
-			<Grid container spacing={3}>
+			<Grid
+				sx={{
+					alignItems: 'center',
+					justifyContent: 'center',
+				}}
+				container
+				spacing={3}>
 				{/* System Status Cards */}
 				<Grid item xs={12}>
 					<Paper sx={{ p: 2, mb: 3 }}>
@@ -164,7 +183,13 @@ export const DashboardPage = () => {
 							}}>
 							<Storage /> System Status
 						</Typography>
-						<Grid container spacing={2}>
+						<Grid
+							sx={{
+								alignItems: 'center',
+								justifyContent: 'center',
+							}}
+							container
+							spacing={2}>
 							<Grid item xs={12} md={6}>
 								<Card>
 									<CardContent>
@@ -173,6 +198,7 @@ export const DashboardPage = () => {
 												display: 'flex',
 												alignItems: 'center',
 												justifyContent: 'space-between',
+												gap: 1,
 											}}>
 											<Typography
 												variant="h6"
@@ -216,15 +242,16 @@ export const DashboardPage = () => {
 							</Grid>
 							<Grid item xs={12} md={6}>
 								<Card>
-									<CardContent>
+									<CardContent sx={{ paddingBottom: 1 }}>
 										<Box
 											sx={{
 												display: 'flex',
 												alignItems: 'center',
 												justifyContent: 'space-between',
+												gap: 1,
 											}}>
 											<Typography
-												variant="h6"
+												variant="h7"
 												sx={{
 													display: 'flex',
 													alignItems: 'center',
@@ -242,9 +269,7 @@ export const DashboardPage = () => {
 														<Error />
 													)
 												}
-												label={
-													systemStatus.database.status
-												}
+												label={'OK'}
 												color={
 													systemStatus.database
 														.status === 'healthy'
@@ -335,27 +360,30 @@ export const DashboardPage = () => {
 							<Typography variant="h6" gutterBottom>
 								Menu Breakdown
 							</Typography>
-							<Grid container spacing={1}>
+							<Grid
+								sx={{
+									justifyContent: 'space-around',
+								}}
+								container
+								spacing={1}>
 								{stats.menuBreakdown.map((menu) => (
-									<Grid item xs={12} md={4} key={menu.id}>
+									<Grid
+										item
+										xs={{ flex: 1 }}
+										md={4}
+										key={menu.id}>
 										<Paper
-											sx={{ p: 2 }}
+											sx={{
+												flex: 1,
+												p: 1.5,
+											}}
 											onClick={() =>
 												handleMenuClick(menu.id)
 											}>
 											<Box
 												sx={{
 													width: 30,
-													p: 1,
 													cursor: 'pointer',
-													transition:
-														'transform 0.2s, box-shadow 0.2s',
-													'&:hover': {
-														transform:
-															'translateY(-4px)',
-														boxShadow:
-															'0 4px 20px rgba(0,0,0,0.25)',
-													},
 												}}>
 												{getMenuIcon(menu.type)}
 												<Typography variant="subtitle1">

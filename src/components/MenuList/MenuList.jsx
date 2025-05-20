@@ -60,15 +60,17 @@ export const MenuList = () => {
 						secondaryAction={
 							<>
 								<IconButton
-									edge="end"
-									onClick={() => handleDelete(menu.id)}>
-									<Delete />
-								</IconButton>
-								<IconButton
+									sx={{ paddingRight: 5 }}
 									edge="end"
 									component={Link}
 									to={`/menu/${menu.id}`}>
 									<Edit />
+								</IconButton>
+								<IconButton
+									sx={{ color: 'red' }}
+									edge="end"
+									onClick={() => handleDelete(menu.id)}>
+									<Delete />
 								</IconButton>
 							</>
 						}>
