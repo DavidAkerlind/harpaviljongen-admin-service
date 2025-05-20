@@ -57,6 +57,15 @@ export const MenuList = () => {
 				{menus.map((menu) => (
 					<ListItem
 						key={menu.id}
+						component={Link}
+						to={`/menu/${menu.id}`}
+						sx={{
+							color: '#FFF',
+							'&:hover': {
+								color: '#90caf9',
+								textDecoration: 'underline',
+							},
+						}}
 						secondaryAction={
 							<>
 								<IconButton
