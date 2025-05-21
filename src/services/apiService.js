@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// const BASE_URL = 'https://harpaviljongen-db-api.onrender.com/api/menus';
-const BASE_URL = 'http://localhost:7000/api/menus';
+const BASE_URL = 'https://harpaviljongen-db-api.onrender.com/api/menus';
+//const BASE_URL = 'http://localhost:7000/api/menus';
 
 export const api = {
 	// Menu operations

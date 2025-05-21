@@ -144,7 +144,7 @@ export const MenuEditor = () => {
 						variant="contained"
 						startIcon={<Edit />}
 						component={Link}
-						to={`/menu/${menuId}/items/new`}>
+						to={`/menu/${menuId}/items`}>
 						Edit items in this menu
 					</Button>
 

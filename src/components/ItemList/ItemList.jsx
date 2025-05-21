@@ -66,9 +66,7 @@ export const ItemList = () => {
 						justifyContent: 'space-between',
 						mb: 3,
 					}}>
-					<Typography variant="h5">
-						Menu Items in '{menuId}'
-					</Typography>
+					<Typography variant="h5">{menuId}</Typography>
 					<Button
 						variant="contained"
 						startIcon={<Add />}
