@@ -61,8 +61,9 @@ export const ItemEditor = () => {
 						item.description
 					),
 					api.updateMenuItem(menuId, itemId, 'price', item.price),
+					api.toggleMenuItem(menuId, itemId),
 					// Update producer if it's a wine menu
-					...(menuType === 'wine'
+					...(menuId === 'menu-wine'
 						? [
 								api.updateMenuItem(
 									menuId,
