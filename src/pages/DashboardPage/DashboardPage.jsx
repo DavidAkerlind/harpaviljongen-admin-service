@@ -280,14 +280,13 @@ export const DashboardPage = () => {
 								background: 'rgba(19, 47, 76, 0.4)',
 								backdropFilter: 'blur(10px)',
 								borderRadius: 2,
-								p: 2,
 							}}>
 							<CardContent>
 								<Typography
 									variant="h6"
 									gutterBottom
 									sx={{
-										mb: 3,
+										mb: 1,
 										display: 'flex',
 										alignItems: 'center',
 										gap: 1,
@@ -354,14 +353,20 @@ export const DashboardPage = () => {
 										}}>
 										<CardContent
 											sx={{
+												gap: 1,
 												display: 'flex',
 												alignItems: 'center',
-												justifyContent: 'space-between',
-												p: 2,
+												flexDirection: {
+													xs: 'column',
+													sm: 'row',
+												},
+												gap: { xs: 2, sm: 0 },
+												p: { xs: 2, sm: 3 },
 												'&:last-child': { pb: 2 },
 											}}>
 											<Box
 												sx={{
+													gap: 1,
 													display: 'flex',
 													alignItems: 'center',
 													gap: 2,
@@ -369,6 +374,7 @@ export const DashboardPage = () => {
 												}}>
 												<Box
 													sx={{
+														gap: 1,
 														p: 1,
 														borderRadius: 1,
 														bgcolor:
@@ -376,7 +382,7 @@ export const DashboardPage = () => {
 													}}>
 													{getMenuIcon(menu.type)}
 												</Box>
-												<Box>
+												<Box sx={{ gap: 1 }}>
 													<Typography
 														variant="subtitle1"
 														sx={{
@@ -447,6 +453,10 @@ export const DashboardPage = () => {
 												<Box sx={{ width: 100 }}>
 													<Box
 														sx={{
+															display: {
+																xs: 'none',
+																sm: 'block',
+															},
 															width: '100%',
 															height: 4,
 															bgcolor:
@@ -455,6 +465,10 @@ export const DashboardPage = () => {
 														}}>
 														<Box
 															sx={{
+																display: {
+																	xs: 'none',
+																	sm: 'block',
+																},
 																width: `${
 																	(menu.activeItems /
 																		menu.itemCount) *
