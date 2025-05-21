@@ -6,4 +6,13 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
 	plugins: [react()],
 	base: '/harpaviljongen-admin-service',
+	server: {
+		proxy: {
+			'/api': {
+				target: 'https://harpaviljongen-db-api.onrender.com',
+				changeOrigin: true,
+				secure: false,
+			},
+		},
+	},
 });

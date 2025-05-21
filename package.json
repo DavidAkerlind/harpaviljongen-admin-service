@@ -1,6 +1,6 @@
 {
 	"name": "harpaviljongen-admin-service",
-	"homepage": "https://davidakerlind.github.io/harpaviljongen-admin-service/",
+	"homepage": "https://davidakerlind.github.io/harpaviljongen-admin-service",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
