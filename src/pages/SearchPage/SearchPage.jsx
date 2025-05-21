@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { BackButton } from '../../components/BackButton/BackButton';
+
 import {
 	Container,
 	Paper,
@@ -28,7 +30,7 @@ export const SearchPage = () => {
 		try {
 			setLoading(true);
 			const response = await api.searchItems(query);
-			setResults(response.data.data);
+			setResults(response.data);
 		} catch (error) {
 			console.error('Search error:', error);
 		} finally {
@@ -38,6 +40,7 @@ export const SearchPage = () => {
 
 	return (
 		<Container maxWidth="md">
+			<BackButton />
 			<Paper sx={{ p: 3, mt: 3 }}>
 				<Typography variant="h5" gutterBottom>
 					Search Menu Items

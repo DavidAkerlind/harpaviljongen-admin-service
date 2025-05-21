@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { BackButton } from '../../components/BackButton/BackButton';
+
 import {
 	Container,
 	Paper,
@@ -35,12 +37,12 @@ export const ItemEditor = () => {
 		try {
 			setLoading(true);
 			const response = await api.getMenuItems(menuId);
-			const foundItem = response.data.data.find((i) => i.id === itemId);
+			const foundItem = response.data.find((i) => i.id === itemId);
 			if (foundItem) {
 				setItem(foundItem);
 			}
 		} catch (err) {
-			setError(err.message);
+			setError(response.message);
 		} finally {
 			setLoading(false);
 		}
@@ -61,7 +63,7 @@ export const ItemEditor = () => {
 						item.description
 					),
 					api.updateMenuItem(menuId, itemId, 'price', item.price),
-					api.toggleMenuItem(menuId, itemId),
+					api.updateMenuItem(menuId, itemId, 'active', item.active),
 					// Update producer if it's a wine menu
 					...(menuId === 'menu-wine'
 						? [
@@ -88,6 +90,7 @@ export const ItemEditor = () => {
 
 	return (
 		<Container maxWidth="md">
+			<BackButton />
 			<Paper sx={{ p: 3, mt: 3 }}>
 				<Typography variant="h5" gutterBottom>
 					{itemId

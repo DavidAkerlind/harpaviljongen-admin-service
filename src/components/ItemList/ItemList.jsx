@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { BackButton } from '../../components/BackButton/BackButton';
+
 import {
 	Container,
 	Paper,
@@ -29,9 +31,9 @@ export const ItemList = () => {
 		try {
 			setLoading(true);
 			const response = await api.getMenuItems(menuId);
-			setItems(response.data.data);
+			setItems(response.data);
 		} catch (err) {
-			setError(err.message);
+			setError(response.message);
 		} finally {
 			setLoading(false);
 		}
@@ -59,6 +61,7 @@ export const ItemList = () => {
 
 	return (
 		<Container maxWidth="md">
+			<BackButton />
 			<Paper sx={{ p: 3, mt: 3 }}>
 				<Box
 					sx={{
