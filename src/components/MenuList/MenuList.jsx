@@ -22,9 +22,10 @@ export const MenuList = () => {
 	const [menus, setMenus] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
-
-	const [deleteMenuDialog, setDeleteMenuDialog] = useState(false);
-	const [deleteItemDialog, setDeleteItemDialog] = useState(null);
+	const [deleteDialog, setDeleteDialog] = useState({
+		open: false,
+		menuId: null,
+	});
 
 	useEffect(() => {
 		loadMenus();
@@ -46,13 +47,17 @@ export const MenuList = () => {
 	const handleDelete = async (e, menuId) => {
 		e.preventDefault();
 		e.stopPropagation();
-		if (window.confirm('Are you sure you want to delete this menu?')) {
-			try {
-				await api.deleteMenu(menuId);
-				loadMenus();
-			} catch (error) {
-				setError('Error deleting menu: ' + error.message);
-			}
+		setDeleteDialog({ open: true, menuId });
+	};
+	// Add this function to handle the actual deletion
+	const handleConfirmDelete = async () => {
+		try {
+			await api.deleteMenu(deleteDialog.menuId);
+			loadMenus();
+		} catch (error) {
+			setError('Error deleting menu: ' + error.message);
+		} finally {
+			setDeleteDialog({ open: false, menuId: null });
 		}
 	};
 
@@ -331,6 +336,15 @@ export const MenuList = () => {
 					</CardContent>
 				</Card>
 			</Fade>
+			<ConfirmDialog
+				open={deleteDialog.open}
+				title="Delete Menu"
+				message="Are you sure you want to delete this menu? All items will also be deleted."
+				confirmText="Delete Menu"
+				onConfirm={handleConfirmDelete}
+				onCancel={() => setDeleteDialog({ open: false, menuId: null })}
+				severity="error"
+			/>
 		</Container>
 	);
 };
