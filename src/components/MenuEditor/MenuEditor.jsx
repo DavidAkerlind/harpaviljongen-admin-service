@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { formatDateTime } from '../../utils/formatDateTime';
 import { BackButton } from '../../components/BackButton/BackButton';
 import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
 import {
@@ -29,6 +30,7 @@ export const MenuEditor = () => {
 		title: '',
 		description: '',
 		type: 'all',
+		price: '',
 	});
 	const [items, setItems] = useState([]);
 	const [loading, setLoading] = useState(false);
@@ -58,9 +60,33 @@ export const MenuEditor = () => {
 
 	const validateForm = () => {
 		const errors = {};
-		if (!menu.id) errors.id = 'Menu ID is required';
-		if (!menu.title) errors.title = 'Title is required';
-		if (!menu.type) errors.type = 'Type is required';
+
+		// Required field validations
+		if (!menu.id.trim()) {
+			errors.id = 'Menu ID is required';
+		} else if (!/^[a-zA-Z0-9-]+$/.test(menu.id)) {
+			errors.id =
+				'Menu ID can only contain letters, numbers, and hyphens';
+		}
+
+		if (!menu.title.trim()) {
+			errors.title = 'Title is required';
+		} else if (menu.title.length < 2) {
+			errors.title = 'Title must be at least 2 characters long';
+		}
+
+		if (!menu.type) {
+			errors.type = 'Please select a menu type';
+		}
+
+		if (menu.type === 'wine') {
+			if (!menu.price) {
+				errors.price = 'Price per glass is required for wine menus';
+			} else if (parseFloat(menu.price) <= 0) {
+				errors.price = 'Price must be greater than 0';
+			}
+		}
+
 		return errors;
 	};
 
@@ -92,17 +118,22 @@ export const MenuEditor = () => {
 
 		if (Object.keys(errors).length > 0) {
 			setFieldErrors(errors);
+			setError('Please fill in all required fields correctly');
 			return;
 		}
 
 		try {
 			setLoading(true);
+			setError(null);
 			setFieldErrors({});
 			if (menuId) {
 				await Promise.all([
 					api.updateMenu(menuId, 'title', menu.title),
 					api.updateMenu(menuId, 'description', menu.description),
 					api.updateMenu(menuId, 'type', menu.type),
+					...(menuId === 'menu-wine'
+						? [api.updateMenu(menuId, 'price', menu.price)]
+						: ''),
 				]);
 				await loadMenu();
 				navigate('/menus');
@@ -111,7 +142,7 @@ export const MenuEditor = () => {
 				navigate(`/menu/${menu.id}`);
 			}
 		} catch (err) {
-			setError(err.message);
+			setError(err.message || 'An error occurred while saving the menu');
 		} finally {
 			setLoading(false);
 		}
@@ -162,10 +193,25 @@ export const MenuEditor = () => {
 							position: { md: 'sticky' },
 							top: { md: 24 },
 						}}>
-						<Typography variant="h5" gutterBottom>
-							{menuId ? 'Edit Menu' : 'New Menu'}
-						</Typography>
-
+						<Box
+							sx={{
+								display: 'flex',
+								justifyContent: 'space-between',
+								alignItems: 'center',
+								mb: 2,
+							}}>
+							<Typography variant="h5">
+								{menuId ? 'Edit Menu' : 'New Menu'}
+							</Typography>
+							{menu.updatedAt && (
+								<Typography
+									variant="caption"
+									color="text.secondary">
+									Last updated:{' '}
+									{formatDateTime(menu.updatedAt)}
+								</Typography>
+							)}
+						</Box>
 						{error && (
 							<Typography color="error" sx={{ mb: 2 }}>
 								{error}
@@ -185,6 +231,8 @@ export const MenuEditor = () => {
 								required
 								disabled={!!menuId}
 								size="small"
+								error={!!fieldErrors.id}
+								helperText={fieldErrors.id}
 							/>
 
 							<TextField
@@ -201,6 +249,8 @@ export const MenuEditor = () => {
 								margin="normal"
 								required
 								size="small"
+								error={!!fieldErrors.title}
+								helperText={fieldErrors.title}
 							/>
 
 							<TextField
@@ -224,18 +274,48 @@ export const MenuEditor = () => {
 								fullWidth
 								label="Type"
 								value={menu.type}
-								onChange={(e) =>
-									setMenu({ ...menu, type: e.target.value })
-								}
+								onChange={(e) => {
+									setMenu({ ...menu, type: e.target.value });
+									setFieldErrors({
+										...fieldErrors,
+										type: '',
+									});
+								}}
 								margin="normal"
 								required
-								size="small">
+								size="small"
+								error={!!fieldErrors.type}
+								helperText={fieldErrors.type}>
 								{menuTypes.map((type) => (
 									<MenuItem key={type} value={type}>
 										{type}
 									</MenuItem>
 								))}
 							</TextField>
+
+							{/* Show producer field only for wine menus */}
+							{menuId === 'menu-wine' && (
+								<TextField
+									fullWidth
+									label="Price / Glass"
+									value={menu.price || ''}
+									onChange={(e) => {
+										setMenu({
+											...menu,
+											price: e.target.value,
+										});
+										setFieldErrors({
+											...fieldErrors,
+											price: '',
+										});
+									}}
+									required
+									margin="normal"
+									type="number"
+									error={!!fieldErrors.price}
+									helperText={fieldErrors.price}
+								/>
+							)}
 
 							<Box
 								sx={{
@@ -314,6 +394,14 @@ export const MenuEditor = () => {
 									({items.length} items)
 								</Typography>
 							</Box>
+							{menu.updatedAt && (
+								<Typography
+									variant="caption"
+									color="text.secondary">
+									Last updated:{' '}
+									{formatDateTime(menu.updatedAt)}
+								</Typography>
+							)}
 							<Box
 								sx={{
 									display: 'flex',
@@ -374,11 +462,25 @@ export const MenuEditor = () => {
 										}}>
 										<ListItemText
 											primary={
-												<Typography
-													variant="subtitle1"
-													sx={{ fontWeight: 500 }}>
-													{item.title}
-												</Typography>
+												<>
+													<Typography
+														variant="subtitle1"
+														sx={{
+															fontWeight: 500,
+														}}>
+														{item.title}
+													</Typography>
+													{item.updatedAt && (
+														<Typography
+															variant="caption"
+															color="text.main">
+															Last Updated:{' '}
+															{formatDateTime(
+																item.updatedAt
+															)}
+														</Typography>
+													)}
+												</>
 											}
 											secondary={
 												<Box sx={{ mt: 1 }}>
@@ -429,6 +531,7 @@ export const MenuEditor = () => {
 														);
 													}}
 													sx={{
+														fontSize: '1rem',
 														border: '1px solid',
 														borderRadius: '8px',
 													}}
@@ -450,9 +553,25 @@ export const MenuEditor = () => {
 													)}
 												</IconButton>
 											</Tooltip>
+											<Tooltip title="Edit">
+												<IconButton
+													sx={{
+														border: '1px solid',
+														borderRadius: '8px',
+													}}
+													onClick={() =>
+														navigate(
+															`/menu/${menuId}/items/${item.id}`
+														)
+													}
+													color="gray">
+													<Edit />
+												</IconButton>
+											</Tooltip>
 											<Tooltip title="Delete">
 												<IconButton
 													sx={{
+														fontSize: '1rem',
 														border: '1px solid',
 														borderRadius: '8px',
 													}}

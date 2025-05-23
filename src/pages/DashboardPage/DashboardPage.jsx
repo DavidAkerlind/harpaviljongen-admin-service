@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
+import { formatDateTime } from '../../utils/formatDateTime';
 import {
 	Container,
 	Grid,
@@ -104,6 +105,7 @@ export const DashboardPage = () => {
 				totalItems: 0,
 				activeItems: 0,
 				menuBreakdown: [],
+				lastUpdated: null,
 			};
 
 			menus.forEach((menu) => {
@@ -114,6 +116,7 @@ export const DashboardPage = () => {
 					itemCount: menu.items.length,
 					activeItems: menu.items.filter((item) => item.active)
 						.length,
+					updatedAt: menu.updatedAt,
 				};
 
 				statistics.totalItems += menuStats.itemCount;
@@ -234,6 +237,7 @@ export const DashboardPage = () => {
 								value={stats.totalMenus}
 								icon={<MenuBook />}
 								color="#4CAF50"
+								updatedAt={stats.updatedAt}
 							/>
 						</Card>
 					</Fade>
@@ -334,7 +338,7 @@ export const DashboardPage = () => {
 									<TrendingUp
 										sx={{ color: 'primary.main' }}
 									/>
-									Menu Analytics
+									Menu Analytics 2
 								</Typography>
 
 								{stats.menuBreakdown.map((menu) => (
@@ -390,6 +394,16 @@ export const DashboardPage = () => {
 														}}>
 														{menu.title}
 													</Typography>
+													{menu.updatedAt && (
+														<Typography
+															variant="caption"
+															color="text.secondary">
+															Last updated:{' '}
+															{formatDateTime(
+																menu.updatedAt
+															)}
+														</Typography>
+													)}
 													<Typography
 														variant="body2"
 														color="textSecondary">
@@ -559,7 +573,15 @@ const StatusCard = ({ title, icon, status, latency }) => (
 	</Paper>
 );
 
-const StatCard = ({ title, value, icon, color, progress, subtitle }) => (
+const StatCard = ({
+	title,
+	value,
+	icon,
+	color,
+	progress,
+	subtitle,
+	updatedAt,
+}) => (
 	<Paper
 		elevation={0}
 		sx={{
@@ -595,11 +617,13 @@ const StatCard = ({ title, value, icon, color, progress, subtitle }) => (
 					</Typography>
 				</Box>
 			</Box>
+
 			{subtitle && (
 				<Typography variant="body2" color="text.secondary">
 					{subtitle}
 				</Typography>
 			)}
+
 			{progress && (
 				<Box sx={{ mt: 2 }}>
 					<Box
@@ -621,6 +645,19 @@ const StatCard = ({ title, value, icon, color, progress, subtitle }) => (
 						/>
 					</Box>
 				</Box>
+			)}
+			{updatedAt && (
+				<Typography
+					variant="caption"
+					color="text.secondary"
+					sx={{
+						mt: 2,
+						display: 'flex',
+						alignItems: 'center',
+						gap: 0.5,
+					}}>
+					Last updated: {formatDateTime(updatedAt)}
+				</Typography>
 			)}
 		</Box>
 	</Paper>
@@ -647,6 +684,11 @@ const MenuCard = ({ menu, onClick }) => (
 		<Typography variant="body2" color="textSecondary">
 			{menu.itemCount} items ({menu.activeItems} active)
 		</Typography>
+		{menu.updatedAt && (
+			<Typography variant="caption" color="text.secondary">
+				Last updated: {formatDateTime(menu.updatedAt)}
+			</Typography>
+		)}
 		<Box
 			sx={{
 				width: '100%',

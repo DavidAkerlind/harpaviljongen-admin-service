@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { BackButton } from '../../components/BackButton/BackButton';
-
+import { formatDateTime } from '../../utils/formatDateTime';
 import {
 	Container,
 	Paper,
@@ -97,6 +97,11 @@ export const ItemEditor = () => {
 						? `Edit Item in '${menuId}'`
 						: `New Item in '${menuId}'`}
 				</Typography>
+				{item.updatedAt && (
+					<Typography variant="caption" color="text.secondary">
+						Last Updated: {formatDateTime(item.updatedAt)}
+					</Typography>
+				)}
 
 				{error && (
 					<Typography color="error" sx={{ mb: 2 }}>
@@ -176,7 +181,7 @@ export const ItemEditor = () => {
 
 						<Button
 							variant="outlined"
-							onClick={() => navigate(`/menu/${menuId}/items`)}>
+							onClick={() => navigate(`/menu/${menuId}`)}>
 							Cancel
 						</Button>
 					</Box>
