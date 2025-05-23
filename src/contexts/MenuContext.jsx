@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import {
+	createContext,
+	useContext,
+	useState,
+	useCallback,
+	useEffect,
+} from 'react';
 import { api } from '../services/apiService.js';
 
 const MenuContext = createContext(null);
@@ -13,7 +19,7 @@ export const MenuProvider = ({ children }) => {
 		try {
 			setLoading(true);
 			const response = await api.getAllMenus();
-			setMenus(response.data.data);
+			setMenus(response.data);
 			setError(null);
 		} catch (err) {
 			setError('Failed to fetch menus: ' + err.message);
@@ -57,6 +63,10 @@ export const MenuProvider = ({ children }) => {
 		},
 		[fetchMenus]
 	);
+	// Add useEffect to fetch menus on mount
+	useEffect(() => {
+		fetchMenus();
+	}, [fetchMenus]);
 
 	const deleteMenu = useCallback(
 		async (menuId) => {
