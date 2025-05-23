@@ -357,7 +357,6 @@ export const DashboardPage = () => {
 										}}>
 										<CardContent
 											sx={{
-												gap: 1,
 												display: 'flex',
 												alignItems: 'center',
 												flexDirection: {
@@ -373,12 +372,10 @@ export const DashboardPage = () => {
 													gap: 1,
 													display: 'flex',
 													alignItems: 'center',
-													gap: 2,
 													flex: 1,
 												}}>
 												<Box
 													sx={{
-														gap: 1,
 														p: 1,
 														borderRadius: 1,
 														bgcolor:
@@ -541,7 +538,7 @@ const StatusCard = ({ title, icon, status, latency }) => (
 				justifyContent: 'space-between',
 				gap: 2,
 			}}>
-			<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+			<Box sx={{ display: 'flex', alignItems: 'center' }}>
 				{React.cloneElement(icon, {
 					sx: {
 						color:
