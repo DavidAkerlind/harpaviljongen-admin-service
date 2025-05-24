@@ -149,7 +149,7 @@ export const DashboardPage = () => {
 
 						<Paper sx={{ p: 2 }}>
 							<Typography>Quick Actions</Typography>
-							<QuickActions />
+							<QuickActions onNavigate={navigate} />
 						</Paper>
 
 						{/* Statistics */}

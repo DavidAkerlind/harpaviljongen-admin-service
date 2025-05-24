@@ -79,11 +79,11 @@ export const EventEditor = () => {
 			if (eventId) {
 				await api.updateEvent(eventId, eventData);
 			} else {
-				console.log(eventData);
 				await api.createEvent(eventData);
 			}
 			navigate('/events');
 		} catch (err) {
+			console.log(err);
 			setError(err.message);
 		} finally {
 			setLoading(false);
