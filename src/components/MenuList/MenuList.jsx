@@ -85,9 +85,6 @@ export const MenuList = () => {
 							fontWeight: 600,
 							boxShadow: 'none',
 						}}>
-						<MenuBook
-							sx={{ color: 'primary.main', boxShadow: 'none' }}
-						/>
 						Menu Management
 					</Typography>
 					<Button

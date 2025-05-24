@@ -15,6 +15,8 @@ import {
 	CardContent,
 	useTheme,
 	useMediaQuery,
+	CircularProgress,
+	Fade,
 } from '@mui/material';
 import { Update as UpdateIcon } from '@mui/icons-material';
 import { api } from '../../services/apiService';
@@ -115,137 +117,172 @@ export const OpeningHoursEditor = () => {
 	return (
 		<Container maxWidth="md">
 			<BackButton />
-			<Paper sx={{ p: 3, mt: 3 }}>
-				<Box
-					sx={{
-						display: 'flex',
-						justifyContent: 'space-between',
-						alignItems: 'center',
-						mb: 3,
-					}}>
-					<Typography variant="h5">Opening Hours</Typography>
-					<Button
-						variant="contained"
-						startIcon={<UpdateIcon />}
-						onClick={loadOpeningHours}
-						disabled={loading}>
-						Refresh
-					</Button>
-				</Box>
+			<Fade in={true} timeout={800}>
+				<Paper sx={{ p: 3, mt: 3 }}>
+					{loading ? (
+						<Box
+							sx={{
+								display: 'flex',
+								justifyContent: 'center',
+								p: 3,
+							}}>
+							<CircularProgress />
+						</Box>
+					) : (
+						<>
+							<Box
+								sx={{
+									display: 'flex',
+									justifyContent: 'space-between',
+									alignItems: 'center',
+									mb: 3,
+								}}>
+								<Typography variant="h5">
+									Opening Hours
+								</Typography>
+								<Button
+									variant="contained"
+									startIcon={<UpdateIcon />}
+									onClick={loadOpeningHours}
+									disabled={loading}>
+									Refresh
+								</Button>
+							</Box>
+							{error && (
+								<Alert severity="error" sx={{ mb: 2 }}>
+									{error}
+								</Alert>
+							)}
+							{success && (
+								<Alert severity="success" sx={{ mb: 2 }}>
+									{success}
+								</Alert>
+							)}
+							<Grid container spacing={2}>
+								{weekDays.map((day) => {
+									const dayHours = editedHours[day] || {
+										from: '',
+										to: '',
+									};
+									return (
+										<Grid item xs={12} key={day}>
+											<Card>
+												<CardContent>
+													<Box
+														sx={{
+															display: 'flex',
+															flexDirection:
+																isMobile
+																	? 'column'
+																	: 'row',
+															alignItems: isMobile
+																? 'stretch'
+																: 'center',
+															gap: 2,
+														}}>
+														<Typography
+															sx={{
+																minWidth:
+																	isMobile
+																		? 'auto'
+																		: 100,
+																mb: isMobile
+																	? 1
+																	: 0,
+																fontWeight: 500,
+															}}>
+															{day}
+														</Typography>
 
-				{error && (
-					<Alert severity="error" sx={{ mb: 2 }}>
-						{error}
-					</Alert>
-				)}
-
-				{success && (
-					<Alert severity="success" sx={{ mb: 2 }}>
-						{success}
-					</Alert>
-				)}
-
-				<Grid container spacing={2}>
-					{weekDays.map((day) => {
-						const dayHours = editedHours[day] || {
-							from: '',
-							to: '',
-						};
-						return (
-							<Grid item xs={12} key={day}>
-								<Card>
-									<CardContent>
-										<Box
-											sx={{
-												display: 'flex',
-												flexDirection: isMobile
-													? 'column'
-													: 'row',
-												alignItems: isMobile
-													? 'stretch'
-													: 'center',
-												gap: 2,
-											}}>
-											<Typography
-												sx={{
-													minWidth: isMobile
-														? 'auto'
-														: 100,
-													mb: isMobile ? 1 : 0,
-													fontWeight: 500,
-												}}>
-												{day}
-											</Typography>
-
-											<Box
-												sx={{
-													display: 'flex',
-													flexDirection: isMobile
-														? 'column'
-														: 'row',
-													gap: 2,
-													flex: 1,
-												}}>
-												<TextField
-													label="From"
-													value={dayHours.from}
-													onChange={(e) =>
-														handleInputChange(
-															day,
-															'from',
-															e.target.value
-														)
-													}
-													placeholder="e.g. 11:00"
-													fullWidth={isMobile}
-													size="small"
-												/>
-												<TextField
-													label="To"
-													value={dayHours.to}
-													onChange={(e) =>
-														handleInputChange(
-															day,
-															'to',
-															e.target.value
-														)
-													}
-													placeholder="e.g. 22:00"
-													fullWidth={isMobile}
-													size="small"
-												/>
-												<Button
-													variant="contained"
-													onClick={() =>
-														handleUpdate(day)
-													}
-													disabled={loading}
-													size="small">
-													Update
-												</Button>
-											</Box>
-										</Box>
-									</CardContent>
-								</Card>
+														<Box
+															sx={{
+																display: 'flex',
+																flexDirection:
+																	isMobile
+																		? 'column'
+																		: 'row',
+																gap: 2,
+																flex: 1,
+															}}>
+															<TextField
+																label="From"
+																value={
+																	dayHours.from
+																}
+																onChange={(e) =>
+																	handleInputChange(
+																		day,
+																		'from',
+																		e.target
+																			.value
+																	)
+																}
+																placeholder="e.g. 11:00"
+																fullWidth={
+																	isMobile
+																}
+																size="small"
+															/>
+															<TextField
+																label="To"
+																value={
+																	dayHours.to
+																}
+																onChange={(e) =>
+																	handleInputChange(
+																		day,
+																		'to',
+																		e.target
+																			.value
+																	)
+																}
+																placeholder="e.g. 22:00"
+																fullWidth={
+																	isMobile
+																}
+																size="small"
+															/>
+															<Button
+																variant="contained"
+																onClick={() =>
+																	handleUpdate(
+																		day
+																	)
+																}
+																disabled={
+																	loading
+																}
+																size="small">
+																Update
+															</Button>
+														</Box>
+													</Box>
+												</CardContent>
+											</Card>
+										</Grid>
+									);
+								})}
 							</Grid>
-						);
-					})}
-				</Grid>
-
-				<Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-					<Button variant="outlined" onClick={() => navigate('/')}>
-						Back to Dashboard
-					</Button>
-					<Button
-						variant="contained"
-						onClick={handleUpdateAll}
-						disabled={loading}
-						color="primary"
-						startIcon={<UpdateIcon />}>
-						Update All
-					</Button>
-				</Box>
-			</Paper>
+							;
+							<Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+								<Button
+									variant="outlined"
+									onClick={() => navigate('/')}>
+									Back to Dashboard
+								</Button>
+								<Button
+									variant="contained"
+									onClick={handleUpdateAll}
+									disabled={loading}
+									color="primary"
+									startIcon={<UpdateIcon />}>
+									Update All
+								</Button>
+							</Box>
+						</>
+					)}
+				</Paper>
+			</Fade>
 		</Container>
 	);
 };

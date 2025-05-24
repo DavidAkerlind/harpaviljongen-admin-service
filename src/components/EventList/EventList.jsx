@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { formatDateTime } from '../../utils/formatDateTime';
+import { CircularProgress, Fade } from '@mui/material';
+
 import {
 	Container,
 	Paper,
@@ -71,128 +73,172 @@ export const EventList = () => {
 	return (
 		<Container maxWidth="lg">
 			<BackButton />
-			<Box sx={{ mt: 4, mb: 4 }}>
-				<Box
-					sx={{
-						display: 'flex',
-						justifyContent: 'space-between',
-						alignItems: 'center',
-						mb: 3,
-					}}>
-					<Typography variant="h4">Events</Typography>
-					<Button
-						variant="contained"
-						startIcon={<AddIcon />}
-						onClick={() => navigate('/events/new')}>
-						Add Event
-					</Button>
-				</Box>
-
-				{error && (
-					<Alert severity="error" sx={{ mb: 3 }}>
-						{error}
-					</Alert>
-				)}
-
-				{events.map((event) => (
-					<Card
-						key={event.eventId}
-						sx={{
-							mb: 2,
-							transition: 'transform 0.2s',
-							'&:hover': {
-								transform: 'translateX(8px)',
-							},
-						}}>
-						<CardContent>
+			<Fade in={true} timeout={800}>
+				<Box sx={{ mt: 4, mb: 4 }}>
+					{loading ? (
+						<Box
+							sx={{
+								display: 'flex',
+								justifyContent: 'center',
+								p: 3,
+							}}>
+							<CircularProgress />
+						</Box>
+					) : (
+						<>
 							<Box
 								sx={{
 									display: 'flex',
 									justifyContent: 'space-between',
-									flexDirection: { xs: 'column', sm: 'row' },
-									gap: 2,
+									alignItems: 'center',
+									mb: 3,
 								}}>
-								<Box sx={{ flex: 1 }}>
-									<Box
-										sx={{
-											display: 'flex',
-											alignItems: 'center',
-											gap: 2,
-											mb: 1,
-										}}>
-										<Typography variant="h6">
-											{event.title}
-										</Typography>
-										<Chip
-											label={event.type}
-											color={eventTypeColors[event.type]}
-											size="small"
-										/>
-									</Box>
-
-									<Typography
-										color="text.secondary"
-										gutterBottom>
-										{formatEventDate(event.date)} •{' '}
-										{event.startTime}-{event.endTime}
-									</Typography>
-
-									<Typography variant="body2">
-										{event.shortDescription}
-									</Typography>
-
-									{event.updatedAt && (
-										<Typography
-											variant="caption"
-											color="text.secondary"
-											sx={{ display: 'block', mt: 1 }}>
-											Last updated:{' '}
-											{formatDateTime(event.updatedAt)}
-										</Typography>
-									)}
-								</Box>
-
-								<Box
-									sx={{
-										display: 'flex',
-										gap: 1,
-										alignItems: 'flex-start',
-									}}>
-									<Tooltip title="Edit Event">
-										<IconButton
-											onClick={() =>
-												navigate(
-													`/events/${event.eventId}`
-												)
-											}
-											color="primary">
-											<EditIcon />
-										</IconButton>
-									</Tooltip>
-
-									<Tooltip title="Delete Event">
-										<IconButton
-											onClick={() =>
-												setDeleteDialog(event)
-											}
-											color="error">
-											<DeleteIcon />
-										</IconButton>
-									</Tooltip>
-								</Box>
+								<Typography variant="h4">Events</Typography>
+								<Button
+									variant="contained"
+									startIcon={<AddIcon />}
+									onClick={() => navigate('/events/new')}>
+									Add Event
+								</Button>
 							</Box>
-						</CardContent>
-					</Card>
-				))}
 
-				{events.length === 0 && !loading && (
-					<Paper sx={{ p: 3, textAlign: 'center' }}>
-						<Typography color="text.secondary">
-							No events found. Click "Add Event" to create one.
-						</Typography>
-					</Paper>
-				)}
-			</Box>
+							{error && (
+								<Alert severity="error" sx={{ mb: 3 }}>
+									{error}
+								</Alert>
+							)}
+
+							{events.map((event) => (
+								<Card
+									component={Link}
+									to={`/events/${event.eventId}`}
+									sx={{ textDecoration: 'none' }}>
+									<Card
+										key={event.eventId}
+										sx={{
+											mb: 2,
+											transition: 'transform 0.2s',
+											'&:hover': {
+												transform: 'translateX(8px)',
+											},
+										}}>
+										<CardContent>
+											<Box
+												sx={{
+													display: 'flex',
+													justifyContent:
+														'space-between',
+													flexDirection: {
+														xs: 'column',
+														sm: 'row',
+													},
+													gap: 2,
+												}}>
+												<Box sx={{ flex: 1 }}>
+													<Box
+														sx={{
+															display: 'flex',
+															alignItems:
+																'center',
+															gap: 2,
+															mb: 1,
+														}}>
+														<Typography variant="h6">
+															{event.title}
+														</Typography>
+														<Chip
+															label={event.type}
+															color={
+																eventTypeColors[
+																	event.type
+																]
+															}
+															size="small"
+														/>
+													</Box>
+
+													<Typography
+														color="text.secondary"
+														gutterBottom>
+														{formatEventDate(
+															event.date
+														)}{' '}
+														• {event.startTime}-
+														{event.endTime}
+													</Typography>
+
+													<Typography variant="body2">
+														{event.shortDescription}
+													</Typography>
+
+													{event.updatedAt && (
+														<Typography
+															variant="caption"
+															color="text.secondary"
+															sx={{
+																display:
+																	'block',
+																mt: 1,
+															}}>
+															Last updated:{' '}
+															{formatDateTime(
+																event.updatedAt
+															)}
+														</Typography>
+													)}
+												</Box>
+
+												<Box
+													sx={{
+														display: 'flex',
+														gap: 1,
+														alignItems:
+															'flex-start',
+													}}>
+													<Tooltip title="Edit Event">
+														<IconButton
+															onClick={(e) => {
+																e.preventDefault();
+																navigate(
+																	`/events/${event.eventId}`
+																);
+															}}
+															color="primary">
+															<EditIcon />
+														</IconButton>
+													</Tooltip>
+
+													<Tooltip title="Delete Event">
+														<IconButton
+															onClick={(e) => {
+																e.preventDefault();
+																setDeleteDialog(
+																	event
+																);
+															}}
+															color="error">
+															<DeleteIcon />
+														</IconButton>
+													</Tooltip>
+												</Box>
+											</Box>
+										</CardContent>
+									</Card>
+								</Card>
+							))}
+
+							{events.length === 0 && (
+								<Paper sx={{ p: 3, textAlign: 'center' }}>
+									<Typography color="text.secondary">
+										No events found. Click "Add Event" to
+										create one.
+									</Typography>
+								</Paper>
+							)}
+						</>
+					)}
+				</Box>
+			</Fade>
 
 			<ConfirmDialog
 				open={!!deleteDialog}

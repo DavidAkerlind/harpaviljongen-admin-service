@@ -1,3 +1,12 @@
-.MuiContainer-root {
-	margin-top: 6rem;
+/* .MuiContainer-root {
+	margin-top: 5rem;
+} */
+
+* {
+	h4,
+	h5,
+	.MuiTypography-h5,
+	.css-1ge63bw-MuiTypography-root {
+		margin-left: 3rem !important;
+	}
 }

@@ -12,15 +12,31 @@ import {
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Logout, Menu as MenuIcon } from '@mui/icons-material';
+import {
+	Logout,
+	Menu as MenuIcon,
+	RestaurantMenu,
+	Event,
+	AccessTime,
+	Dashboard,
+	Search,
+} from '@mui/icons-material';
 import { useState } from 'react';
 
 export const Navbar = () => {
 	const { user, logout } = useAuth();
 	const navigate = useNavigate();
 	const theme = useTheme();
-	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 	const [anchorEl, setAnchorEl] = useState(null);
+
+	const menuItems = [
+		{ path: '/', icon: <Dashboard />, label: 'Dashboard' },
+		{ path: '/menus', icon: <RestaurantMenu />, label: 'Menus' },
+		{ path: '/events', icon: <Event />, label: 'Events' },
+		{ path: '/opening-hours', icon: <AccessTime />, label: 'Hours' },
+		{ path: '/search', icon: <Search />, label: 'Search' },
+	];
 
 	const handleLogout = async () => {
 		await logout();
@@ -40,8 +56,11 @@ export const Navbar = () => {
 		navigate(path);
 		handleMenuClose();
 	};
+
 	return (
-		<AppBar position="static">
+		<AppBar
+			sx={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
+			position="static">
 			<Toolbar>
 				<Typography
 					color="inherit"
@@ -53,20 +72,18 @@ export const Navbar = () => {
 				</Typography>
 				{user && (
 					<>
-						<Button
-							color="inherit"
-							component={Link}
-							to="/menus"
-							sx={{ mr: 2 }}>
-							Edit Menus
-						</Button>
-
 						{isMobile ? (
 							<>
 								<IconButton
 									color="inherit"
 									onClick={handleMenuOpen}
-									edge="end">
+									edge="end"
+									sx={{
+										padding: 1,
+										'& .MuiSvgIcon-root': {
+											fontSize: '3rem', // Makes the hamburger icon larger
+										},
+									}}>
 									<MenuIcon />
 								</IconButton>
 								<Menu
@@ -74,71 +91,73 @@ export const Navbar = () => {
 									open={Boolean(anchorEl)}
 									onClose={handleMenuClose}
 									anchorOrigin={{
-										vertical: 'top',
+										vertical: 'bottom',
 										horizontal: 'right',
 									}}
 									transformOrigin={{
 										vertical: 'top',
 										horizontal: 'right',
+									}}
+									PaperProps={{
+										sx: {
+											width: '180px',
+											mt: 0.2, // Makes menu wider
+											'& .MuiMenuItem-root': {
+												py: 3, // More vertical padding
+												px: 2, // More horizontal padding
+												'& .MuiSvgIcon-root': {
+													fontSize: '1.5rem', // Makes menu icons larger
+												},
+												typography: 'body1', // Larger text
+											},
+										},
 									}}>
-									<MenuItem
-										onClick={() => handleNavigation('/')}>
-										Dashboard
-									</MenuItem>
-									<MenuItem
-										onClick={() =>
-											handleNavigation('/menus')
-										}>
-										Edit Menus
-									</MenuItem>
-									<MenuItem
-										onClick={() =>
-											handleNavigation('/events')
-										}>
-										Events
-									</MenuItem>
-									<MenuItem
-										onClick={() =>
-											handleNavigation('/opening-hours')
-										}>
-										Opening Hours
-									</MenuItem>
-									<MenuItem
-										onClick={() =>
-											handleNavigation('/search')
-										}>
-										Search
-									</MenuItem>
+									{menuItems.map((item) => (
+										<MenuItem
+											key={item.path}
+											onClick={() =>
+												handleNavigation(item.path)
+											}
+											sx={{
+												display: 'flex',
+												gap: 1,
+												alignItems: 'center',
+												borderBottom: '1px solid black',
+											}}>
+											{item.icon}
+											{item.label}
+										</MenuItem>
+									))}
 									<MenuItem
 										onClick={handleLogout}
-										sx={{ color: 'error.main' }}>
+										sx={{
+											color: 'error.main',
+											display: 'flex',
+											gap: 1,
+											alignItems: 'center',
+										}}>
+										<Logout />
 										Logout
 									</MenuItem>
 								</Menu>
 							</>
 						) : (
-							<Box sx={{ display: 'flex', gap: 1 }}>
-								<Button color="inherit" component={Link} to="/">
-									Dashboard
-								</Button>
-								<Button
-									color="inherit"
-									component={Link}
-									to="/events">
-									Events
-								</Button>
-								<Button
-									color="inherit"
-									component={Link}
-									to="/opening-hours">
-									Opening Hours
-								</Button>
-								<Button
-									color="inherit"
-									component={Link}
-									to="/search">
-									Search
-								</Button>
+							<Box sx={{ display: 'flex', gap: 0 }}>
+								{menuItems.map((item) => (
+									<Button
+										key={item.path}
+										color="inherit"
+										component={Link}
+										to={item.path}
+										startIcon={item.icon}
+										sx={{
+											display: 'flex',
+											alignItems: 'center',
+											gap: 0.5,
+										}}>
+										{item.label}
+									</Button>
+								))}
 								<Button
 									color="error"
 									onClick={handleLogout}

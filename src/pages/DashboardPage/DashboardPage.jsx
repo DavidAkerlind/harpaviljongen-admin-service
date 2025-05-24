@@ -12,12 +12,7 @@ import {
 	Fade,
 	Paper,
 } from '@mui/material';
-import {
-	MenuBook,
-	CheckBox,
-	Restaurant,
-	Grid3x3Outlined,
-} from '@mui/icons-material';
+import { MenuBook, CheckBox, Restaurant, Link } from '@mui/icons-material';
 import { api } from '../../services/apiService';
 import { DashboardHeader } from '../../components/DashboardComponents/DashboardHeader';
 import { SystemStatus } from '../../components/DashboardComponents/SystemStatus';
@@ -148,41 +143,12 @@ export const DashboardPage = () => {
 						</Grid>
 
 						<Paper sx={{ p: 2 }}>
-							<Typography>Quick Actions</Typography>
+							<Typography sx={{ paddingBottom: 1 }}>
+								<Link />
+								Quick Actions
+							</Typography>
 							<QuickActions onNavigate={navigate} />
 						</Paper>
-
-						{/* Statistics */}
-						<StatCard
-							title="Total Menus"
-							value={data.stats.totalMenus}
-							icon={<MenuBook />}
-							color="#4CAF50"
-						/>
-
-						<StatCard
-							title="Total Items"
-							value={data.stats.totalItems}
-							icon={<Restaurant />}
-							color="#2196F3"
-							progress={
-								(data.stats.activeItems /
-									data.stats.totalItems) *
-								100
-							}
-						/>
-
-						<StatCard
-							title="Active Items"
-							value={data.stats.activeItems}
-							icon={<CheckBox />}
-							color="#FF9800"
-							subtitle={`${(
-								(data.stats.activeItems /
-									data.stats.totalItems) *
-								100
-							).toFixed(1)}% of total`}
-						/>
 
 						{/* Menu List */}
 						<Grid item xs={12} md={6}>

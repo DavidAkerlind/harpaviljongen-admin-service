@@ -11,6 +11,8 @@ import {
 	Box,
 	MenuItem,
 	Alert,
+	CircularProgress,
+	Fade,
 } from '@mui/material';
 import { api } from '../../services/apiService';
 
@@ -28,6 +30,7 @@ export const EventEditor = () => {
 		endTime: '',
 		type: '',
 		image: '/src/assets/pictures/event.png',
+		updatedAt: '',
 	});
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
@@ -41,10 +44,8 @@ export const EventEditor = () => {
 	const loadEvent = async () => {
 		try {
 			setLoading(true);
-			console.log(eventId);
 			const response = await api.getEventById(eventId);
-			console.log(response);
-			setEvent(response.data[0]);
+			setEvent(response.data);
 		} catch (err) {
 			setError(err.message);
 		} finally {
@@ -93,144 +94,170 @@ export const EventEditor = () => {
 	return (
 		<Container maxWidth="md">
 			<BackButton />
-			<Paper sx={{ p: 3, mt: 3 }}>
-				<Typography variant="h5" gutterBottom>
-					{eventId ? 'Edit Event' : 'New Event'}
-				</Typography>
+			<Fade in={true} timeout={800}>
+				<Paper sx={{ p: 3, mt: 3 }}>
+					{loading ? (
+						<Box
+							sx={{
+								display: 'flex',
+								justifyContent: 'center',
+								p: 3,
+							}}>
+							<CircularProgress />
+						</Box>
+					) : (
+						<>
+							<Typography variant="h5" gutterBottom>
+								{eventId ? `Edit: ${event.title}` : 'New Event'}
+							</Typography>
 
-				{event.updatedAt && (
-					<Typography variant="caption" color="text.secondary">
-						Last Updated: {formatDateTime(event.updatedAt)}
-					</Typography>
-				)}
+							{event.updatedAt && (
+								<Typography
+									variant="caption"
+									color="text.secondary">
+									Last Updated:{' '}
+									{formatDateTime(event.updatedAt)}
+								</Typography>
+							)}
 
-				{error && (
-					<Alert severity="error" sx={{ mt: 2, mb: 2 }}>
-						{error}
-					</Alert>
-				)}
+							{error && (
+								<Alert severity="error" sx={{ mt: 2, mb: 2 }}>
+									{error}
+								</Alert>
+							)}
 
-				<form onSubmit={handleSubmit}>
-					<TextField
-						fullWidth
-						label="Title"
-						value={event.title}
-						onChange={(e) =>
-							setEvent({ ...event, title: e.target.value })
-						}
-						margin="normal"
-						required
-					/>
+							<form onSubmit={handleSubmit}>
+								<TextField
+									fullWidth
+									label="Title"
+									value={event.title}
+									onChange={(e) =>
+										setEvent({
+											...event,
+											title: e.target.value,
+										})
+									}
+									margin="normal"
+									required
+								/>
+								<TextField
+									fullWidth
+									label="Short Description"
+									value={event.shortDescription}
+									onChange={(e) =>
+										setEvent({
+											...event,
+											shortDescription: e.target.value,
+										})
+									}
+									margin="normal"
+									required
+									inputProps={{ maxLength: 50 }}
+									helperText={`${event.shortDescription.length}/50 characters`}
+								/>
 
-					<TextField
-						fullWidth
-						label="Short Description"
-						value={event.shortDescription}
-						onChange={(e) =>
-							setEvent({
-								...event,
-								shortDescription: e.target.value,
-							})
-						}
-						margin="normal"
-						required
-						inputProps={{ maxLength: 100 }}
-						helperText={`${event.shortDescription.length}/100 characters`}
-					/>
+								<TextField
+									fullWidth
+									label="Long Description"
+									value={event.longDescription}
+									onChange={(e) =>
+										setEvent({
+											...event,
+											longDescription: e.target.value,
+										})
+									}
+									margin="normal"
+									multiline
+									rows={4}
+									required
+								/>
+								<TextField
+									fullWidth
+									label="Date"
+									type="date"
+									value={event.date}
+									onChange={(e) =>
+										setEvent({
+											...event,
+											date: e.target.value,
+										})
+									}
+									margin="normal"
+									required
+									InputLabelProps={{ shrink: true }}
+								/>
+								<Box sx={{ display: 'flex', gap: 2 }}>
+									<TextField
+										fullWidth
+										label="Start Time"
+										type="time"
+										value={event.startTime}
+										onChange={(e) =>
+											setEvent({
+												...event,
+												startTime: e.target.value,
+											})
+										}
+										margin="normal"
+										required
+										InputLabelProps={{ shrink: true }}
+									/>
 
-					<TextField
-						fullWidth
-						label="Long Description"
-						value={event.longDescription}
-						onChange={(e) =>
-							setEvent({
-								...event,
-								longDescription: e.target.value,
-							})
-						}
-						margin="normal"
-						multiline
-						rows={4}
-						required
-					/>
+									<TextField
+										fullWidth
+										label="End Time"
+										type="time"
+										value={event.endTime}
+										onChange={(e) =>
+											setEvent({
+												...event,
+												endTime: e.target.value,
+											})
+										}
+										margin="normal"
+										required
+										InputLabelProps={{ shrink: true }}
+									/>
+								</Box>
+								<TextField
+									select
+									fullWidth
+									label="Event Type"
+									value={event.type}
+									onChange={(e) =>
+										setEvent({
+											...event,
+											type: e.target.value,
+										})
+									}
+									margin="normal"
+									required>
+									{eventTypes.map((type) => (
+										<MenuItem key={type} value={type}>
+											{type.charAt(0).toUpperCase() +
+												type.slice(1)}
+										</MenuItem>
+									))}
+								</TextField>
+								<Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+									<Button
+										variant="contained"
+										type="submit"
+										disabled={loading}>
+										{loading ? 'Saving...' : 'Save Event'}
+									</Button>
 
-					<TextField
-						fullWidth
-						label="Date"
-						type="date"
-						value={event.date}
-						onChange={(e) =>
-							setEvent({ ...event, date: e.target.value })
-						}
-						margin="normal"
-						required
-						InputLabelProps={{ shrink: true }}
-					/>
-
-					<Box sx={{ display: 'flex', gap: 2 }}>
-						<TextField
-							fullWidth
-							label="Start Time"
-							type="time"
-							value={event.startTime}
-							onChange={(e) =>
-								setEvent({
-									...event,
-									startTime: e.target.value,
-								})
-							}
-							margin="normal"
-							required
-							InputLabelProps={{ shrink: true }}
-						/>
-
-						<TextField
-							fullWidth
-							label="End Time"
-							type="time"
-							value={event.endTime}
-							onChange={(e) =>
-								setEvent({ ...event, endTime: e.target.value })
-							}
-							margin="normal"
-							required
-							InputLabelProps={{ shrink: true }}
-						/>
-					</Box>
-
-					<TextField
-						select
-						fullWidth
-						label="Event Type"
-						value={event.type}
-						onChange={(e) =>
-							setEvent({ ...event, type: e.target.value })
-						}
-						margin="normal"
-						required>
-						{eventTypes.map((type) => (
-							<MenuItem key={type} value={type}>
-								{type.charAt(0).toUpperCase() + type.slice(1)}
-							</MenuItem>
-						))}
-					</TextField>
-
-					<Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-						<Button
-							variant="contained"
-							type="submit"
-							disabled={loading}>
-							{loading ? 'Saving...' : 'Save Event'}
-						</Button>
-
-						<Button
-							variant="outlined"
-							onClick={() => navigate('/events')}>
-							Cancel
-						</Button>
-					</Box>
-				</form>
-			</Paper>
+									<Button
+										variant="outlined"
+										onClick={() => navigate('/events')}>
+										Cancel
+									</Button>
+								</Box>
+							</form>
+						</>
+					)}
+				</Paper>
+			</Fade>
 		</Container>
 	);
 };

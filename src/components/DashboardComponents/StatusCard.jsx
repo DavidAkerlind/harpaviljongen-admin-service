@@ -38,15 +38,12 @@ export const StatusCard = ({ title, status, latency }) => (
 					<Typography variant="h6" sx={{ fontWeight: 500 }}>
 						{title}
 					</Typography>
-					<Typography variant="body2" color="text.secondary">
-						Status:{' '}
-						{status.charAt(0).toUpperCase() + status.slice(1)}
-					</Typography>
 				</Box>
 			</Box>
 			<Typography
 				variant="h6"
 				sx={{
+					marginLeft: '5px',
 					color: status === 'healthy' ? 'success.main' : 'error.main',
 					fontWeight: 500,
 				}}>

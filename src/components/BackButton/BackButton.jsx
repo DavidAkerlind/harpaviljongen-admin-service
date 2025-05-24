@@ -11,11 +11,13 @@ export const BackButton = () => {
 				onClick={() => navigate(-1)}
 				sx={{
 					position: 'absolute',
-					left: 10,
-					top: 90,
-					bgcolor: 'background.paper',
+					zIndex: '999',
+					left: 16,
+					top: 95,
+					bgcolor: 'primary.main',
+					color: 'background.default',
 					'&:hover': {
-						bgcolor: 'background.default',
+						bgcolor: 'primary.dark',
 						transform: 'scale(1.1)',
 					},
 					transition: 'all 0.2s',
