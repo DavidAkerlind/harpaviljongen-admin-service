@@ -153,7 +153,6 @@ export const ItemEditor = () => {
 							setItem({ ...item, price: e.target.value })
 						}
 						margin="normal"
-						type="number"
 					/>
 
 					<FormControlLabel
