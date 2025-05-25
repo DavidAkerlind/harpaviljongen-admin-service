@@ -42,6 +42,7 @@ export const MenuEditor = () => {
 	const menuTypes = [
 		'all',
 		'wine',
+		'wine-all',
 		'lunch',
 		'sweets',
 		'small',
