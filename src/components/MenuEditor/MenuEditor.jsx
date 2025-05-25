@@ -43,6 +43,7 @@ export const MenuEditor = () => {
 		'all',
 		'wine',
 		'wine-all',
+		'wine-all small',
 		'lunch',
 		'sweets',
 		'small',
