@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { BackButton } from '../../components/BackButton/BackButton';
 
 import {
@@ -69,7 +69,12 @@ export const ItemList = () => {
 						justifyContent: 'space-between',
 						mb: 3,
 					}}>
-					<Typography variant="h5">{menuId}</Typography>
+					<Typography
+						component={Link}
+						to={`/menu/${menuId}`}
+						variant="h5">
+						{menuId}
+					</Typography>
 					<Button
 						variant="contained"
 						startIcon={<Add />}
