@@ -139,8 +139,8 @@ export const EventEditor = () => {
 									}
 									margin="normal"
 									required
-									inputProps={{ maxLength: 20 }}
-									helperText={`${event.title.length}/20 characters`}
+									inputProps={{ maxLength: 25 }}
+									helperText={`${event.title.length}/25 characters`}
 								/>
 								<TextField
 									fullWidth
