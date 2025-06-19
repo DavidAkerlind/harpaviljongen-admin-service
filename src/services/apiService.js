@@ -53,6 +53,7 @@ const menuApi = createApiInstance('menus');
 const authApi = createApiInstance('auth');
 const eventsApi = createApiInstance('events');
 const openingHoursApi = createApiInstance('openingHours');
+const wineListApi = createApiInstance('wine-list');
 
 export const api = {
 	// Menu operations
@@ -177,6 +178,56 @@ export const api = {
 		const response = await menuApi.get(`/search/items`, {
 			params: { query },
 		});
+		return response.data;
+	},
+
+	// ...befintlig kod ovanför...
+
+	// Wine List operations
+	getAllWineLists: async () => {
+		const response = await wineListApi.get('/');
+		console.log(response.data);
+		return response.data;
+	},
+
+	getWineListById: async (id) => {
+		const response = await wineListApi.get(`/${id}`);
+		console.log(response.data);
+		return response.data;
+	},
+
+	updateWineList: async (id, data) => {
+		const response = await wineListApi.put(`/${id}`, data);
+		console.log(response.data);
+		return response.data;
+	},
+
+	addWine: async (id, wine) => {
+		const response = await wineListApi.post(`/${id}/wine`, wine);
+		console.log(response.data);
+		return response.data;
+	},
+
+	updateWine: async (listId, wineId, wine) => {
+		const response = await wineListApi.put(
+			`/${listId}/wine/${wineId}`,
+			wine
+		);
+		console.log(response.data);
+		return response.data;
+	},
+
+	deleteWine: async (listId, wineId) => {
+		const response = await wineListApi.delete(`/${listId}/wine/${wineId}`);
+		console.log(response.data);
+		return response.data;
+	},
+
+	toggleWineActive: async (listId, wineId) => {
+		const response = await wineListApi.patch(
+			`/${listId}/wine/${wineId}/toggle`
+		);
+		console.log(response.data);
 		return response.data;
 	},
 

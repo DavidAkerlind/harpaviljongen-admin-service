@@ -13,6 +13,10 @@ import { LoginPage } from './pages/LoginPage/LoginPage';
 import { EventEditor } from './components/EventEditor/EventEditor';
 import { OpeningHoursEditor } from './components/OpeningHoursEditor/OpeningHoursEditor';
 import { EventList } from './components/EventList/EventList.jsx';
+import { WineListManager } from './components/WineListManager/WineListManager';
+import { WineListOverview } from './components/WineListOverview/WineListOverview';
+import { WineEditPage } from './components/WineEditPage/WineEditPage';
+
 //  PAGES
 import { SearchPage } from './pages/SearchPage/SearchPage';
 import { DashboardPage } from './pages/DashboardPage/DashboardPage';
@@ -80,6 +84,18 @@ function App() {
 											<Route
 												path="/opening-hours"
 												element={<OpeningHoursEditor />}
+											/>
+											<Route
+												path="/wine-lists"
+												element={<WineListManager />}
+											/>
+											<Route
+												path="/wine-lists/:id"
+												element={<WineListOverview />}
+											/>
+											<Route
+												path="/wine-lists/:id/wine/:wineId"
+												element={<WineEditPage />}
 											/>
 										</Routes>
 									</ProtectedRoute>
