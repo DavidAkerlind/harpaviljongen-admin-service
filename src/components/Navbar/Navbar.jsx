@@ -20,6 +20,7 @@ import {
 	AccessTime,
 	Dashboard,
 	Search,
+	Liquor,
 } from '@mui/icons-material';
 import { useState } from 'react';
 
@@ -35,6 +36,7 @@ export const Navbar = () => {
 		{ path: '/menus', icon: <RestaurantMenu />, label: 'Menus' },
 		{ path: '/events', icon: <Event />, label: 'Events' },
 		{ path: '/opening-hours', icon: <AccessTime />, label: 'Hours' },
+		{ path: '/wine-lists', icon: <Liquor />, label: 'Winelists' },
 		{ path: '/search', icon: <Search />, label: 'Search' },
 	];
 

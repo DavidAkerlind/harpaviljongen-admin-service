@@ -92,7 +92,7 @@ export const WineListOverview = () => {
 													{(area.items || []).map(
 														(wine) => (
 															<TableRow
-																key={wine._id}>
+																key={wine.id}>
 																<TableCell>
 																	{wine.name}
 																</TableCell>
@@ -107,7 +107,7 @@ export const WineListOverview = () => {
 																		}
 																		onChange={() =>
 																			handleToggleWine(
-																				wine._id
+																				wine.id
 																			)
 																		}
 																		color="primary"
