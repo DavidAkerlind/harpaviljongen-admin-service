@@ -62,10 +62,8 @@ export const WineEditPage = () => {
 	};
 
 	const handleToggleWine = async (wineId) => {
-		console.log(wine);
-		console.log(id, wineId);
-		await api.toggleWineActive(id, wineId);
-		fetchWineList();
+		await api.toggleWineActive(id, wine.id);
+		handleSave();
 	};
 
 	return (
