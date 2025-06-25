@@ -16,6 +16,7 @@ import { EventList } from './components/EventList/EventList.jsx';
 import { WineListManager } from './components/WineListManager/WineListManager';
 import { WineListOverview } from './components/WineListOverview/WineListOverview';
 import { WineEditPage } from './components/WineEditPage/WineEditPage';
+import { AddWinePage } from './components/AddWinePage/AddWinePage';
 
 //  PAGES
 import { SearchPage } from './pages/SearchPage/SearchPage';
@@ -96,6 +97,10 @@ function App() {
 											<Route
 												path="/wine-lists/:id/wine/:wineId"
 												element={<WineEditPage />}
+											/>
+											<Route
+												path="/wine-lists/:id/add-wine"
+												element={<AddWinePage />}
 											/>
 										</Routes>
 									</ProtectedRoute>

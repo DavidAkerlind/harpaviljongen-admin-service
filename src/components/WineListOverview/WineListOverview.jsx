@@ -15,6 +15,9 @@ import {
 	CircularProgress,
 	Switch,
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
+
 import { api } from '../../services/apiService';
 
 export const WineListOverview = () => {
@@ -22,6 +25,10 @@ export const WineListOverview = () => {
 	const navigate = useNavigate();
 	const [wineList, setWineList] = useState(null);
 	const [loading, setLoading] = useState(true);
+	const [deleteDialog, setDeleteDialog] = useState({
+		open: false,
+		wineId: null,
+	});
 
 	const fetchWineList = async () => {
 		setLoading(true);
@@ -43,6 +50,13 @@ export const WineListOverview = () => {
 		fetchWineList();
 	};
 
+	const handleDeleteWine = async (wineId) => {
+		console.log(id, wineId);
+
+		await api.deleteWine(id, wineId);
+		fetchWineList();
+	};
+
 	return (
 		<Container maxWidth="md">
 			<Button sx={{ mb: 2 }} onClick={() => navigate('/wine-lists')}>
@@ -57,6 +71,13 @@ export const WineListOverview = () => {
 					<Typography variant="h4" sx={{ mb: 2 }}>
 						{wineList.title}
 					</Typography>
+					<Button
+						variant="contained"
+						color="primary"
+						sx={{ mb: 2 }}
+						onClick={() => navigate(`/wine-lists/${id}/add-wine`)}>
+						Add new wine
+					</Button>
 					{Object.values(wineList.countries || {}).map((country) => (
 						<Box key={country.country} sx={{ mb: 3 }}>
 							<Typography variant="h6">
@@ -68,6 +89,7 @@ export const WineListOverview = () => {
 										<Typography variant="subtitle1">
 											{area.area}
 										</Typography>
+
 										<TableContainer
 											component={Paper}
 											sx={{ mb: 2 }}>
@@ -86,8 +108,12 @@ export const WineListOverview = () => {
 														<TableCell>
 															Edit
 														</TableCell>
+														<TableCell>
+															Delete
+														</TableCell>
 													</TableRow>
 												</TableHead>
+
 												<TableBody>
 													{(area.items || []).map(
 														(wine) => (
@@ -125,6 +151,28 @@ export const WineListOverview = () => {
 																		Edit
 																	</Button>
 																</TableCell>
+																<TableCell>
+																	<Button
+																		variant="outlined"
+																		color="error"
+																		size="small"
+																		onClick={(
+																			e
+																		) => {
+																			e.stopPropagation();
+																			setDeleteDialog(
+																				{
+																					open: true,
+																					wineId: wine.id,
+																				}
+																			);
+																		}}
+																		startIcon={
+																			<DeleteIcon />
+																		}>
+																		Delete
+																	</Button>
+																</TableCell>
 															</TableRow>
 														)
 													)}
@@ -142,6 +190,20 @@ export const WineListOverview = () => {
 							)}
 						</Box>
 					))}
+					<ConfirmDialog
+						open={deleteDialog.open}
+						title="Delete Wine"
+						message="Are you sure you want to delete this wine?"
+						confirmText="Delete Wine"
+						onConfirm={() => {
+							handleDeleteWine(deleteDialog.wineId);
+							setDeleteDialog({ open: false, wineId: null });
+						}}
+						onCancel={() =>
+							setDeleteDialog({ open: false, wineId: null })
+						}
+						severity="error"
+					/>
 				</>
 			) : (
 				<Typography color="error">
