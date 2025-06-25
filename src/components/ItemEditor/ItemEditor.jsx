@@ -80,7 +80,7 @@ export const ItemEditor = () => {
 				// Create new item
 				await api.addMenuItem(menuId, item);
 			}
-			navigate(`/menu/${menuId}/items`);
+			navigate(`/menu/${menuId}`);
 		} catch (err) {
 			setError(err.message);
 		} finally {

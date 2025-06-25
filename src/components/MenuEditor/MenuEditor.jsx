@@ -230,7 +230,6 @@ export const MenuEditor = () => {
 									setFieldErrors({ ...fieldErrors, id: '' });
 								}}
 								margin="normal"
-								required
 								disabled={!!menuId}
 								size="small"
 								error={!!fieldErrors.id}
@@ -249,7 +248,6 @@ export const MenuEditor = () => {
 									});
 								}}
 								margin="normal"
-								required
 								size="small"
 								error={!!fieldErrors.title}
 								helperText={fieldErrors.title}
@@ -284,7 +282,6 @@ export const MenuEditor = () => {
 									});
 								}}
 								margin="normal"
-								required
 								size="small"
 								error={!!fieldErrors.type}
 								helperText={fieldErrors.type}>
@@ -311,7 +308,6 @@ export const MenuEditor = () => {
 											price: '',
 										});
 									}}
-									required
 									margin="normal"
 									type="number"
 									error={!!fieldErrors.price}

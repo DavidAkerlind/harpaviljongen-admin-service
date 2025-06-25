@@ -42,6 +42,8 @@ export const getMenuIcon = (type) => {
 			return <LocalDining sx={{ color: '#42A5F5' }} />; // Restaurant icon in blue
 		case 'coffee':
 			return <LocalCafe sx={{ color: '#8D6E63' }} />; // Coffee icon in brown
+		case 'wine-all small':
+			return <Liquor sx={{ color: '#F1f1f1f' }} />; // Wine glass icon in purple
 		default:
 			return <Restaurant sx={{ color: '#78909C' }} />; // Default in grey
 	}
