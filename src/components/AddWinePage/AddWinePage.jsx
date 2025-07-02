@@ -142,7 +142,6 @@ export const AddWinePage = () => {
 								name="area"
 								margin="normal"
 								fullWidth
-								required
 							/>
 						)}
 					/>
