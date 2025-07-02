@@ -76,21 +76,15 @@ export const AddWinePage = () => {
 		setError('');
 		setSuccess('');
 		try {
-			// Double call as required
 			await api.addWine(id, {
 				country: form.country,
 				area: form.area,
 				name: form.name,
 				price: Number(form.price),
 			});
-			// const res = await api.addWine(id, {
-			// 	country: form.country,
-			// 	area: form.area,
-			// 	name: form.name,
-			// 	price: Number(form.price),
-			// });
+
 			setSuccess('Wine added!');
-			setTimeout(() => navigate(`/wine-lists/${id}`), 1200);
+			setTimeout(() => navigate(`/wine-lists/${id}`), 800);
 		} catch (e) {
 			setError(e.message || 'Could not add wine');
 		}
