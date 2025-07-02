@@ -76,6 +76,7 @@ export const AddWinePage = () => {
 		setError('');
 		setSuccess('');
 		try {
+			console.log(id, form.country, form.area, form.name);
 			await api.addWine(id, {
 				country: form.country,
 				area: form.area,
