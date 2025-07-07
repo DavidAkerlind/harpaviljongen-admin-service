@@ -109,7 +109,7 @@ export const WineEditPage = () => {
 							fullWidth
 							margin="normal"
 							inputProps={{ maxLength: 60 }}
-							helperText={`${form.name.length}/60`}
+							helperText={`${wine.name.length}/60`}
 						/>
 						<TextField
 							label="Price"
@@ -124,7 +124,7 @@ export const WineEditPage = () => {
 							fullWidth
 							margin="normal"
 							inputProps={{ maxLength: 5 }}
-							helperText={`${form.price.length}/5`}
+							helperText={`${wine.price.length}/5`}
 						/>
 						<FormControlLabel
 							control={
