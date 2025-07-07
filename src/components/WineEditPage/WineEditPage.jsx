@@ -81,6 +81,25 @@ export const WineEditPage = () => {
 						<Typography variant="h5" sx={{ mb: 2 }}>
 							Edit Wine
 						</Typography>
+
+						<TextField
+							label="Country"
+							value={wine.country || ''}
+							onChange={(e) =>
+								setWine({ ...wine, country: e.target.value })
+							}
+							fullWidth
+							margin="normal"
+						/>
+						<TextField
+							label="Area"
+							value={wine.area || ''}
+							onChange={(e) =>
+								setWine({ ...wine, area: e.target.value })
+							}
+							fullWidth
+							margin="normal"
+						/>
 						<TextField
 							label="Name"
 							value={wine.name || ''}
@@ -99,24 +118,6 @@ export const WineEditPage = () => {
 									...wine,
 									price: Number(e.target.value),
 								})
-							}
-							fullWidth
-							margin="normal"
-						/>
-						<TextField
-							label="Country"
-							value={wine.country || ''}
-							onChange={(e) =>
-								setWine({ ...wine, country: e.target.value })
-							}
-							fullWidth
-							margin="normal"
-						/>
-						<TextField
-							label="Area"
-							value={wine.area || ''}
-							onChange={(e) =>
-								setWine({ ...wine, area: e.target.value })
 							}
 							fullWidth
 							margin="normal"

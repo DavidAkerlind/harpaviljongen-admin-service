@@ -148,6 +148,8 @@ export const AddWinePage = () => {
 						fullWidth
 						margin="normal"
 						required
+						inputProps={{ maxLength: 60 }}
+						helperText={`${form.name.length}/60`}
 					/>
 					<TextField
 						label="Price"
@@ -158,6 +160,8 @@ export const AddWinePage = () => {
 						fullWidth
 						margin="normal"
 						required
+						inputProps={{ maxLength: 5 }}
+						helperText={`${form.name.length}/5`}
 					/>
 					<Box sx={{ mt: 2 }}>
 						<Button
