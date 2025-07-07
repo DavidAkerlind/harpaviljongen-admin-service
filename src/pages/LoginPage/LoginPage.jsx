@@ -44,7 +44,7 @@ export const LoginPage = () => {
 			<Paper sx={{ p: 4, textAlign: 'center' }}>
 				<Box sx={{ mb: 3 }}>
 					<Lock sx={{ fontSize: 40, color: 'primary.main' }} />
-					<Typography variant="h5" sx={{ mt: 2 }}>
+					<Typography variant="h3" sx={{ mt: 2 }}>
 						Admin Login
 					</Typography>
 				</Box>
