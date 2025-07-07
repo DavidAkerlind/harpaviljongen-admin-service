@@ -124,7 +124,7 @@ export const WineEditPage = () => {
 							fullWidth
 							margin="normal"
 							inputProps={{ maxLength: 5 }}
-							helperText={`${wine.price.length}/5`}
+							helperText={`Only numbers here`}
 						/>
 						<FormControlLabel
 							control={
