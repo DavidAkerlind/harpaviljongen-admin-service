@@ -161,7 +161,7 @@ export const AddWinePage = () => {
 						margin="normal"
 						required
 						inputProps={{ maxLength: 5 }}
-						helperText={`${form.name.length}/5`}
+						helperText={`${form.price.length}/5`}
 					/>
 					<Box sx={{ mt: 2 }}>
 						<Button
