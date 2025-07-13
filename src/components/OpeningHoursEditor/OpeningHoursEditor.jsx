@@ -140,6 +140,11 @@ export const OpeningHoursEditor = () => {
 								<Typography variant="h5">
 									Opening Hours
 								</Typography>
+								<Typography
+									variant="h6"
+									style={{ color: 'light-gray' }}>
+									Both fields empty = Closed
+								</Typography>
 								<Button
 									variant="contained"
 									startIcon={<UpdateIcon />}
@@ -263,7 +268,6 @@ export const OpeningHoursEditor = () => {
 									);
 								})}
 							</Grid>
-							;
 							<Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
 								<Button
 									variant="outlined"
