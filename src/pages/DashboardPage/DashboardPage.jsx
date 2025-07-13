@@ -1,3 +1,4 @@
+import './dashboardPage.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatDateTime } from '../../utils/formatDateTime';
@@ -11,8 +12,24 @@ import {
 	Typography,
 	Fade,
 	Paper,
+	Button,
+	IconButton,
+	Tooltip,
+	Chip,
 } from '@mui/material';
-import { MenuBook, CheckBox, Restaurant, Link } from '@mui/icons-material';
+import {
+	MenuBook,
+	CheckBox,
+	Restaurant,
+	Link,
+	Event,
+	Schedule,
+	Add,
+	Edit,
+	Visibility,
+	Refresh,
+	Dashboard as DashboardIcon,
+} from '@mui/icons-material';
 import { api } from '../../services/apiService';
 import { DashboardHeader } from '../../components/DashboardComponents/DashboardHeader';
 import { SystemStatus } from '../../components/DashboardComponents/SystemStatus';
@@ -170,84 +187,95 @@ export const DashboardPage = () => {
 											{formatDateTime(new Date())}
 										</Typography>
 									</Box>
-									{data.stats.menuBreakdown.map((menu) => (
-										<Paper
-											key={menu.id}
-											sx={{
-												p: 2,
-												mb: 2,
-												cursor: 'pointer',
-												transition: 'transform 0.2s',
-												'&:hover': {
-													transform:
-														'translateX(8px)',
-												},
-											}}
-											onClick={() =>
-												navigate(`/menu/${menu.id}`)
-											}>
-											<Box
-												sx={{
-													display: 'flex',
-													justifyContent:
-														'space-between',
-													alignItems: 'center',
-												}}>
-												<Box>
-													<Typography variant="subtitle1">
-														{menu.title}
-													</Typography>
-													<Typography
-														variant="body2"
-														color="text.secondary">
-														{menu.activeItems}{' '}
-														active /{' '}
-														{menu.itemCount} total
-														items
-													</Typography>
-													{menu.updatedAt && (
-														<Typography
-															variant="caption"
-															color="text.secondary">
-															Updated:{' '}
-															{formatDateTime(
-																menu.updatedAt
-															)}
-														</Typography>
-													)}
-												</Box>
-												<Box sx={{ width: 100 }}>
+									<section className="menu-grid">
+										{data.stats.menuBreakdown.map(
+											(menu) => (
+												<Paper
+													key={menu.id}
+													sx={{
+														p: 2,
+														mb: 2,
+														cursor: 'pointer',
+														transition:
+															'transform 0.2s',
+														'&:hover': {
+															transform:
+																'translateX(8px)',
+														},
+													}}
+													onClick={() =>
+														navigate(
+															`/menu/${menu.id}`
+														)
+													}>
 													<Box
 														sx={{
-															width: '100%',
-															height: 4,
-															bgcolor:
-																'rgba(0,0,0,0.1)',
-															borderRadius: 1,
+															display: 'flex',
+															justifyContent:
+																'space-between',
+															alignItems:
+																'center',
 														}}>
+														<Box>
+															<Typography variant="subtitle1">
+																{menu.title}
+															</Typography>
+															<Typography
+																variant="body2"
+																color="text.secondary">
+																{
+																	menu.activeItems
+																}{' '}
+																active /{' '}
+																{menu.itemCount}{' '}
+																total items
+															</Typography>
+															{menu.updatedAt && (
+																<Typography
+																	variant="caption"
+																	color="text.secondary">
+																	Updated:{' '}
+																	{formatDateTime(
+																		menu.updatedAt
+																	)}
+																</Typography>
+															)}
+														</Box>
 														<Box
-															sx={{
-																width: `${
-																	(menu.activeItems /
-																		menu.itemCount) *
-																	100
-																}%`,
-																height: '100%',
-																bgcolor:
-																	'#4CAF50',
-																borderRadius: 1,
-															}}
-														/>
+															sx={{ width: 100 }}>
+															<Box
+																sx={{
+																	width: '100%',
+																	height: 4,
+																	bgcolor:
+																		'rgba(0,0,0,0.1)',
+																	borderRadius: 1,
+																}}>
+																<Box
+																	sx={{
+																		width: `${
+																			(menu.activeItems /
+																				menu.itemCount) *
+																			100
+																		}%`,
+																		height: '100%',
+																		bgcolor:
+																			'#4CAF50',
+																		borderRadius: 1,
+																	}}
+																/>
+															</Box>
+														</Box>
 													</Box>
-												</Box>
-											</Box>
-										</Paper>
-									))}
+												</Paper>
+											)
+										)}
+									</section>
 								</CardContent>
 							</Card>
 						</Grid>
 
-						{/* Events List */}
+						{/* Events List
 						<Grid item xs={12} md={6}>
 							<Card sx={{ height: '100%' }}>
 								<CardContent>
@@ -318,7 +346,7 @@ export const DashboardPage = () => {
 									)}
 								</CardContent>
 							</Card>
-						</Grid>
+						</Grid> */}
 					</Grid>
 				</Box>
 			</Fade>

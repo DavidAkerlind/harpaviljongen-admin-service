@@ -49,7 +49,7 @@ export const SearchPage = () => {
 				<form onSubmit={handleSearch}>
 					<TextField
 						fullWidth
-						label="Search items..."
+						label="Search menu items..."
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
 						margin="normal"

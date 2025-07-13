@@ -1,0 +1,12 @@
+.menu-grid {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 0.5rem;
+}
+
+/* Responsive - en kolumn på mindre skärmar */
+@media (max-width: 768px) {
+	.menu-grid {
+		grid-template-columns: 1fr;
+	}
+}

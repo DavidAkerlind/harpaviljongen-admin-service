@@ -8,7 +8,7 @@ import {
 } from '@mui/icons-material';
 
 export const QuickActions = ({ onNavigate }) => (
-	<Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+	<Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', maxWidth: '500px' }}>
 		<Button
 			variant="outlined"
 			startIcon={<MenuBook />}
