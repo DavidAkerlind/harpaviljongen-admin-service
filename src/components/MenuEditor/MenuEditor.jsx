@@ -292,7 +292,7 @@ export const MenuEditor = () => {
 								))}
 							</TextField>
 
-							{/* Show producer field only for wine menus */}
+							{/* Show producer field only for wine menus
 							{menuId === 'menu-wine' && (
 								<TextField
 									fullWidth
@@ -313,7 +313,7 @@ export const MenuEditor = () => {
 									error={!!fieldErrors.price}
 									helperText={fieldErrors.price}
 								/>
-							)}
+							)} */}
 
 							<Box
 								sx={{
