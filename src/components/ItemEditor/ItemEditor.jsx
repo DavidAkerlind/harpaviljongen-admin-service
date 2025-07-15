@@ -121,17 +121,6 @@ export const ItemEditor = () => {
 						required
 					/>
 
-					<TextField
-						fullWidth
-						label="Description"
-						value={item.description}
-						onChange={(e) =>
-							setItem({ ...item, description: e.target.value })
-						}
-						margin="normal"
-						multiline
-						rows={3}
-					/>
 					{/* Show producer field only for wine menus */}
 					{menuId === 'menu-wine' && (
 						<TextField
@@ -144,6 +133,18 @@ export const ItemEditor = () => {
 							margin="normal"
 						/>
 					)}
+
+					<TextField
+						fullWidth
+						label="Description"
+						value={item.description}
+						onChange={(e) =>
+							setItem({ ...item, description: e.target.value })
+						}
+						margin="normal"
+						multiline
+						rows={3}
+					/>
 
 					<TextField
 						fullWidth
