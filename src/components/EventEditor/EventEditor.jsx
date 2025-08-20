@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { api } from '../../services/apiService';
 
-const eventTypes = ['dj', 'wine', 'private', 'other'];
+const eventTypes = ['dj', 'wine', 'private', 'other', 'boule'];
 
 export const EventEditor = () => {
 	const { eventId } = useParams();
@@ -192,7 +192,7 @@ export const EventEditor = () => {
 									<TextField
 										fullWidth
 										label="Start Time"
-										type="time"
+										type="text"
 										value={event.startTime}
 										onChange={(e) =>
 											setEvent({
@@ -201,14 +201,13 @@ export const EventEditor = () => {
 											})
 										}
 										margin="normal"
-										required
 										InputLabelProps={{ shrink: true }}
 									/>
 
 									<TextField
 										fullWidth
 										label="End Time"
-										type="time"
+										type="text"
 										value={event.endTime}
 										onChange={(e) =>
 											setEvent({
@@ -217,7 +216,6 @@ export const EventEditor = () => {
 											})
 										}
 										margin="normal"
-										required
 										InputLabelProps={{ shrink: true }}
 									/>
 								</Box>
