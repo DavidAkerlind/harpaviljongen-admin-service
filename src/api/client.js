@@ -35,8 +35,15 @@ export const tokenStore = {
 
 // Swedish text for the API errors staff can actually run into
 const SWEDISH_STATUS_MESSAGES = {
+	403: 'Du har inte behörighet att göra det här.',
+	409: 'Användarnamnet är redan taget.',
 	413: 'Filen är för stor (max 10 MB).',
 	429: 'För många inloggningsförsök. Vänta en stund och försök igen.',
+};
+
+// API messages (English) that staff can run into, in Swedish
+const SWEDISH_API_MESSAGES = {
+	'Current password is incorrect': 'Nuvarande lösenord stämmer inte.',
 };
 
 export const client = axios.create({ baseURL: API_URL, timeout: 60000 });
@@ -56,9 +63,11 @@ client.interceptors.response.use(
 			tokenStore.clear();
 			window.dispatchEvent(new Event('auth:expired'));
 		}
+		const apiMessage = error.response?.data?.message;
 		const message =
 			SWEDISH_STATUS_MESSAGES[status] ||
-			error.response?.data?.message ||
+			SWEDISH_API_MESSAGES[apiMessage] ||
+			apiMessage ||
 			(error.code === 'ECONNABORTED'
 				? 'Servern svarade inte i tid. Försök igen.'
 				: error.code === 'ERR_NETWORK'

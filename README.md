@@ -5,10 +5,14 @@ It covers what the restaurant actually updates:
 
 | Page | What it does |
 | --- | --- |
-| **Översikt** | Status of the website, API and database, plus what is live right now (menu, wine list, opening hours, visible pages). |
-| **Menyer** | Upload the *Meny* and *Vinlista* as PDF, preview them, choose which one the website links to, stop showing, delete. All uploads are kept until deleted. Only one per list is active. |
+| **Översikt** | Status of the website, API and database, what is live right now (menu, wine list, opening hours, visible pages), and **Senaste ändringar**: who changed what, newest first. |
+| **Menyer** | Upload the *Meny* and *Vinlista* as PDF (the dashed card first in the grid: click it or drop a PDF on it), preview them, rename them (pencil), choose which one the website links to, stop showing, delete. All uploads are kept until deleted. Only one per list is active. |
 | **Öppettider** | The whole week in one save. A switch per day for open/closed. |
 | **Sidor** | Show or hide *Chambre séparée*, *Evenemang* and *Galleri*, separately in the navbar and as a button on the homepage. Hidden pages still open with a direct link. |
+| **Användare** | Admins only. Add logins as *Personal* or *Admin*, change the role, set a new password for someone who forgot theirs, delete *Personal*. You can't change or delete yourself. On phones it's behind your initial top right. |
+| **Byt lösenord** | Everyone. Click your name at the bottom of the sidebar (on phones: your initial top right). Your other devices are logged out. |
+
+**Roles:** *Personal* (`employee`) can do everything above except **Användare**. *Admin* can do everything. The API enforces this; the admin just hides what you can't use.
 
 The admin talks to the [Harpaviljongen API](https://github.com/DavidAkerlind/harpaviljongen-DB-API) on Render. Every change needs a login token from that API; reading is public.
 The API has more endpoints (menu items, events, wine lists) that this admin deliberately doesn't show.
@@ -55,9 +59,9 @@ Step-by-step, including the order to deploy API → admin → website, is in [do
 ```
 src/
   api/          client.js (axios + token), index.js (all API calls)
-  auth/         AuthContext.jsx (login, logout, token check)
-  components/   AppLayout, PageHeader, ConfirmDialog, Notifications, pdf/*
-  pages/        OverviewPage, MenusPage, OpeningHoursPage, PagesPage, LoginPage
+  auth/         AuthContext.jsx (login, logout, token check, isAdmin)
+  components/   AppLayout, PageHeader, ConfirmDialog, Notifications, pdf/*, users/*
+  pages/        OverviewPage, MenusPage, OpeningHoursPage, PagesPage, UsersPage, LoginPage
   utils/        format.js (dates, sizes, days), sitePages.js
   theme.js      colours and MUI theme
 ```

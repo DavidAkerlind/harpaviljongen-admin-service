@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
 	AppBar,
@@ -6,15 +7,17 @@ import {
 	BottomNavigationAction,
 	Box,
 	Button,
+	ButtonBase,
 	Divider,
 	IconButton,
 	List,
 	ListItemButton,
 	ListItemIcon,
 	ListItemText,
+	Menu,
+	MenuItem,
 	Paper,
 	Toolbar,
-	Tooltip,
 	Typography,
 } from '@mui/material';
 import {
@@ -24,9 +27,15 @@ import {
 	WebOutlined,
 	OpenInNew,
 	Logout,
+	PeopleOutline,
+	KeyOutlined,
+	UnfoldMore,
 } from '@mui/icons-material';
 import { useAuth } from '../auth/AuthContext';
+import { ROLES } from '../api';
 import { SITE_URL } from '../api/client';
+import { useNotify } from './Notifications';
+import { PasswordDialog } from './PasswordDialog';
 import { brand } from '../theme';
 import hareLogo from '../assets/hare-logo-white.svg';
 
@@ -43,6 +52,13 @@ const NAV_ITEMS = [
 	{ label: 'Öppettider', to: '/oppettider', icon: <ScheduleOutlined /> },
 	{ label: 'Sidor', to: '/sidor', icon: <WebOutlined /> },
 ];
+
+// Only for admins: in the sidebar on desktop, in the account menu on phones
+const USERS_ITEM = {
+	label: 'Användare',
+	to: '/anvandare',
+	icon: <PeopleOutline />,
+};
 
 const isActive = (item, pathname) =>
 	item.to === '/'
@@ -75,9 +91,25 @@ function Brand() {
 	);
 }
 
+function UserAvatar({ user, size = 32 }) {
+	return (
+		<Avatar
+			sx={{
+				width: size,
+				height: size,
+				bgcolor: brand.moss,
+				color: '#fff',
+				fontSize: Math.round(size * 0.45),
+			}}>
+			{user?.username?.[0]?.toUpperCase()}
+		</Avatar>
+	);
+}
+
 function Sidebar() {
 	const { pathname } = useLocation();
-	const { user, logout } = useAuth();
+	const { user, isAdmin } = useAuth();
+	const items = isAdmin ? [...NAV_ITEMS, USERS_ITEM] : NAV_ITEMS;
 
 	return (
 		<Box
@@ -94,7 +126,7 @@ function Sidebar() {
 			}}>
 			<Brand />
 			<List sx={{ mt: 4, display: 'grid', gap: 0.5 }}>
-				{NAV_ITEMS.map((item) => {
+				{items.map((item) => {
 					const active = isActive(item, pathname);
 					return (
 						<ListItemButton
@@ -129,36 +161,129 @@ function Sidebar() {
 					Öppna hemsidan
 				</Button>
 				<Divider sx={{ borderColor: 'rgba(255,255,255,0.12)' }} />
-				<Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-					<Avatar
-						sx={{
-							width: 32,
-							height: 32,
-							bgcolor: brand.moss,
-							fontSize: '0.9rem',
-						}}>
-						{user?.username?.[0]?.toUpperCase()}
-					</Avatar>
-					<Typography sx={{ flex: 1, fontSize: '0.9rem' }} noWrap>
-						{user?.username}
-					</Typography>
-					<Tooltip title="Logga ut">
-						<IconButton
-							onClick={logout}
-							sx={{ color: 'rgba(255,255,255,0.75)' }}
-							aria-label="Logga ut">
-							<Logout fontSize="small" />
-						</IconButton>
-					</Tooltip>
-				</Box>
+				<AccountMenu
+					placement="above"
+					trigger={(open) => (
+						<ButtonBase
+							onClick={open}
+							aria-label="Konto"
+							aria-haspopup="menu"
+							sx={{
+								width: 'calc(100% + 16px)',
+								mx: -1,
+								p: 1,
+								gap: 1.5,
+								borderRadius: 2,
+								justifyContent: 'flex-start',
+								textAlign: 'left',
+								'&:hover': { bgcolor: 'rgba(255,255,255,0.08)' },
+							}}>
+							<UserAvatar user={user} />
+							<Box sx={{ flex: 1, minWidth: 0, lineHeight: 1.2 }}>
+								<Typography sx={{ fontSize: '0.9rem' }} noWrap>
+									{user?.username}
+								</Typography>
+								<Typography sx={{ fontSize: '0.75rem', opacity: 0.65 }}>
+									{ROLES[user?.role]?.label}
+								</Typography>
+							</Box>
+							<UnfoldMore fontSize="small" sx={{ opacity: 0.6 }} />
+						</ButtonBase>
+					)}
+				/>
 			</Box>
 		</Box>
 	);
 }
 
+// placement 'above': opens upwards from the sidebar footer, which already shows the name
+function AccountMenu({ trigger, placement = 'below', showUsersLink = false }) {
+	const { user, isAdmin, logout, changePassword } = useAuth();
+	const notify = useNotify();
+	const [anchor, setAnchor] = useState(null);
+	const [passwordOpen, setPasswordOpen] = useState(false);
+	const above = placement === 'above';
+	const close = () => setAnchor(null);
+
+	return (
+		<>
+			{trigger((e) => setAnchor(e.currentTarget))}
+			<Menu
+				anchorEl={anchor}
+				open={Boolean(anchor)}
+				onClose={close}
+				anchorOrigin={
+					above
+						? { vertical: 'top', horizontal: 'left' }
+						: { vertical: 'bottom', horizontal: 'right' }
+				}
+				transformOrigin={
+					above
+						? { vertical: 'bottom', horizontal: 'left' }
+						: { vertical: 'top', horizontal: 'right' }
+				}
+				slotProps={{
+					paper: { sx: { minWidth: 220, mt: above ? -1 : 1 } },
+				}}>
+				{!above && (
+					<Box sx={{ px: 2, py: 1 }}>
+						<Typography sx={{ fontWeight: 600 }} noWrap>
+							{user?.username}
+						</Typography>
+						<Typography variant="body2" color="text.secondary">
+							{ROLES[user?.role]?.label}
+						</Typography>
+					</Box>
+				)}
+				{!above && <Divider />}
+				{showUsersLink && isAdmin && (
+					<MenuItem component={NavLink} to={USERS_ITEM.to} onClick={close}>
+						<ListItemIcon>{USERS_ITEM.icon}</ListItemIcon>
+						{USERS_ITEM.label}
+					</MenuItem>
+				)}
+				<MenuItem
+					onClick={() => {
+						close();
+						setPasswordOpen(true);
+					}}>
+					<ListItemIcon>
+						<KeyOutlined />
+					</ListItemIcon>
+					Byt lösenord
+				</MenuItem>
+				<MenuItem
+					onClick={() => {
+						close();
+						logout();
+					}}>
+					<ListItemIcon>
+						<Logout />
+					</ListItemIcon>
+					Logga ut
+				</MenuItem>
+			</Menu>
+
+			<PasswordDialog
+				open={passwordOpen}
+				askCurrent
+				title="Byt lösenord"
+				description="Du loggas ut på dina andra enheter, men inte här."
+				submitText="Byt lösenord"
+				onSubmit={async ({ current, password }) => {
+					await changePassword(current, password);
+					setPasswordOpen(false);
+					notify('Lösenordet är bytt');
+				}}
+				onClose={() => setPasswordOpen(false)}
+			/>
+		</>
+	);
+}
+
 function MobileBars() {
 	const { pathname } = useLocation();
-	const { logout } = useAuth();
+	const { user } = useAuth();
 	const current = NAV_ITEMS.findIndex((item) => isActive(item, pathname));
 
 	return (
@@ -179,9 +304,18 @@ function MobileBars() {
 						aria-label="Öppna hemsidan">
 						<OpenInNew />
 					</IconButton>
-					<IconButton color="inherit" onClick={logout} aria-label="Logga ut">
-						<Logout />
-					</IconButton>
+					<AccountMenu
+						showUsersLink
+						trigger={(open) => (
+							<IconButton
+								onClick={open}
+								aria-label="Konto"
+								aria-haspopup="menu"
+								sx={{ p: 0.5 }}>
+								<UserAvatar user={user} size={30} />
+							</IconButton>
+						)}
+					/>
 				</Toolbar>
 			</AppBar>
 			<Paper

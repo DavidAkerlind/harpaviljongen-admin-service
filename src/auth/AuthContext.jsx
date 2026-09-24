@@ -57,14 +57,35 @@ export function AuthProvider({ children }) {
 		setStatus('signedIn');
 	}, []);
 
+	// The API logs out all other devices and sends a new token for this one
+	const changePassword = useCallback(async (currentPassword, newPassword) => {
+		const { token, user } = await api.changePassword(
+			currentPassword,
+			newPassword
+		);
+		tokenStore.set(token);
+		setUser(user);
+	}, []);
+
 	const logout = useCallback(() => {
 		tokenStore.clear();
 		setUser(null);
 		setStatus('signedOut');
 	}, []);
 
+	const isAdmin = user?.role === 'admin';
+
 	return (
-		<AuthContext.Provider value={{ user, status, notice, login, logout }}>
+		<AuthContext.Provider
+			value={{
+				user,
+				isAdmin,
+				status,
+				notice,
+				login,
+				logout,
+				changePassword,
+			}}>
 			{children}
 		</AuthContext.Provider>
 	);

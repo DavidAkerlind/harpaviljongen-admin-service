@@ -83,6 +83,9 @@ export function LoginPage() {
 							autoFocus
 							required
 							size="medium"
+							slotProps={{
+								htmlInput: { autoCapitalize: 'none', spellCheck: false },
+							}}
 						/>
 						<TextField
 							label="Lösenord"

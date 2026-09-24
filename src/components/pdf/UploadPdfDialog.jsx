@@ -20,14 +20,36 @@ import { brand } from '../../theme';
 
 const MAX_MB = 10;
 
-export function UploadPdfDialog({ open, list, onClose, onUploaded }) {
+const fileProblem = (file) => {
+	if (file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) {
+		return 'Filen måste vara en PDF.';
+	}
+	if (file.size > MAX_MB * 1024 * 1024) {
+		return `Filen är för stor (${formatBytes(file.size)}). Max ${MAX_MB} MB.`;
+	}
+	return null;
+};
+
+const titleFromFile = (file) => file.name.replace(/\.pdf$/i, '');
+
+// initialFile: a file dropped on the upload card. The parent remounts the dialog
+// (new key) each time it opens, so it starts from that file.
+export function UploadPdfDialog({
+	open,
+	list,
+	initialFile = null,
+	onClose,
+	onUploaded,
+}) {
 	const inputRef = useRef(null);
-	const [file, setFile] = useState(null);
-	const [title, setTitle] = useState('');
+	const initialProblem = initialFile ? fileProblem(initialFile) : null;
+	const startFile = initialFile && !initialProblem ? initialFile : null;
+	const [file, setFile] = useState(startFile);
+	const [title, setTitle] = useState(startFile ? titleFromFile(startFile) : '');
 	const [activate, setActivate] = useState(false);
 	const [dragging, setDragging] = useState(false);
 	const [progress, setProgress] = useState(null);
-	const [error, setError] = useState(null);
+	const [error, setError] = useState(initialProblem);
 	const uploading = progress !== null;
 
 	const reset = () => {
@@ -47,16 +69,10 @@ export function UploadPdfDialog({ open, list, onClose, onUploaded }) {
 	const pick = (picked) => {
 		setError(null);
 		if (!picked) return;
-		if (picked.type !== 'application/pdf' && !/\.pdf$/i.test(picked.name)) {
-			return setError('Filen måste vara en PDF.');
-		}
-		if (picked.size > MAX_MB * 1024 * 1024) {
-			return setError(
-				`Filen är för stor (${formatBytes(picked.size)}). Max ${MAX_MB} MB.`
-			);
-		}
+		const problem = fileProblem(picked);
+		if (problem) return setError(problem);
 		setFile(picked);
-		if (!title) setTitle(picked.name.replace(/\.pdf$/i, ''));
+		if (!title) setTitle(titleFromFile(picked));
 	};
 
 	const upload = async () => {
