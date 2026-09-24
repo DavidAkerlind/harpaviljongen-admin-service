@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
 	AppBar,
-	Avatar,
 	BottomNavigation,
 	BottomNavigationAction,
 	Box,
@@ -30,19 +29,28 @@ import {
 	PeopleOutline,
 	KeyOutlined,
 	UnfoldMore,
+	AccountCircleOutlined,
 } from '@mui/icons-material';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../api';
 import { SITE_URL } from '../api/client';
 import { useNotify } from './Notifications';
 import { PasswordDialog } from './PasswordDialog';
+import { UserAvatar } from './UserAvatar';
+import { displayName } from '../utils/user';
 import { brand } from '../theme';
 import hareLogo from '../assets/hare-logo-white.svg';
 
 const DRAWER_WIDTH = 248;
 
 const NAV_ITEMS = [
-	{ label: 'Översikt', to: '/', icon: <SpaceDashboardOutlined /> },
+	{
+		label: 'Översikt',
+		to: '/',
+		// Alla ändringar is opened from Översikt
+		also: '/andringar',
+		icon: <SpaceDashboardOutlined />,
+	},
 	{
 		label: 'Menyer',
 		to: '/menyer/meny',
@@ -61,9 +69,10 @@ const USERS_ITEM = {
 };
 
 const isActive = (item, pathname) =>
-	item.to === '/'
+	(item.to === '/'
 		? pathname === '/'
-		: pathname.startsWith(item.match ?? item.to);
+		: pathname.startsWith(item.match ?? item.to)) ||
+	(item.also && pathname.startsWith(item.also));
 
 function Brand() {
 	return (
@@ -88,21 +97,6 @@ function Brand() {
 				</Typography>
 			</Box>
 		</Box>
-	);
-}
-
-function UserAvatar({ user, size = 32 }) {
-	return (
-		<Avatar
-			sx={{
-				width: size,
-				height: size,
-				bgcolor: brand.moss,
-				color: '#fff',
-				fontSize: Math.round(size * 0.45),
-			}}>
-			{user?.username?.[0]?.toUpperCase()}
-		</Avatar>
 	);
 }
 
@@ -181,7 +175,7 @@ function Sidebar() {
 							<UserAvatar user={user} />
 							<Box sx={{ flex: 1, minWidth: 0, lineHeight: 1.2 }}>
 								<Typography sx={{ fontSize: '0.9rem' }} noWrap>
-									{user?.username}
+									{displayName(user)}
 								</Typography>
 								<Typography sx={{ fontSize: '0.75rem', opacity: 0.65 }}>
 									{ROLES[user?.role]?.label}
@@ -228,7 +222,7 @@ function AccountMenu({ trigger, placement = 'below', showUsersLink = false }) {
 				{!above && (
 					<Box sx={{ px: 2, py: 1 }}>
 						<Typography sx={{ fontWeight: 600 }} noWrap>
-							{user?.username}
+							{displayName(user)}
 						</Typography>
 						<Typography variant="body2" color="text.secondary">
 							{ROLES[user?.role]?.label}
@@ -242,6 +236,12 @@ function AccountMenu({ trigger, placement = 'below', showUsersLink = false }) {
 						{USERS_ITEM.label}
 					</MenuItem>
 				)}
+				<MenuItem component={NavLink} to="/profil" onClick={close}>
+					<ListItemIcon>
+						<AccountCircleOutlined />
+					</ListItemIcon>
+					Min profil
+				</MenuItem>
 				<MenuItem
 					onClick={() => {
 						close();

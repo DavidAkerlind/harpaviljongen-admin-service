@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
 	Alert,
-	Avatar,
 	Box,
 	Button,
 	Card,
@@ -20,13 +19,13 @@ import { PageHeader } from '../components/PageHeader';
 import { PdfThumbnail } from '../components/pdf/PdfThumbnail';
 import {
 	formatDate,
-	formatDateTime,
 	formatHours,
 	formatRelative,
 	todayName,
 	WEEK_DAYS,
 } from '../utils/format';
-import { describeActivity } from '../utils/activity';
+import { firstName } from '../utils/user';
+import { ActivityRow } from '../components/activity/ActivityRow';
 import { SITE_PAGES } from '../utils/sitePages';
 import { brand } from '../theme';
 
@@ -96,7 +95,7 @@ export function OverviewPage() {
 	return (
 		<>
 			<PageHeader
-				title={`Hej${user?.username ? `, ${user.username}` : ''}!`}
+				title={`Hej${user ? `, ${firstName(user)}` : ''}!`}
 				description="Här är läget på hemsidan just nu."
 				actions={
 					<Tooltip title="Uppdatera">
@@ -147,7 +146,7 @@ export function OverviewPage() {
 				))}
 				<HoursCard hours={data?.hours} loading={!data && !error} />
 				<PagesCard pages={data?.pages} loading={!data && !error} />
-				<ActivityCard key={refreshKey} me={user?.username} />
+				<ActivityCard key={refreshKey} me={user} />
 			</Box>
 		</>
 	);
@@ -378,28 +377,23 @@ function VisibilityMark({ on }) {
 	);
 }
 
-const FEW = 6;
-const MANY = 30;
+const LATEST = 6;
 
-// Senaste ändringar: who changed what, newest first
+// Senaste ändringar: the latest few, and a link to all of them
 function ActivityCard({ me }) {
 	const [items, setItems] = useState(null);
-	const [limit, setLimit] = useState(FEW);
 	const [error, setError] = useState(null);
 
 	useEffect(() => {
 		let cancelled = false;
 		api
-			.getActivity(limit + 1) // one extra tells whether there are more
-			.then((list) => !cancelled && setItems(list))
+			.getActivity({ limit: LATEST })
+			.then((result) => !cancelled && setItems(result.items))
 			.catch((err) => !cancelled && setError(err.message));
 		return () => {
 			cancelled = true;
 		};
-	}, [limit]);
-
-	const shown = items?.slice(0, limit);
-	const hasMore = items?.length > limit;
+	}, []);
 
 	return (
 		<Card sx={{ gridColumn: '1 / -1' }}>
@@ -411,65 +405,35 @@ function ActivityCard({ me }) {
 					<Alert severity="error" sx={{ mt: 1 }}>
 						Kunde inte hämta ändringarna. {error}
 					</Alert>
-				) : !shown ? (
+				) : !items ? (
 					<Skeleton variant="rounded" height={160} sx={{ mt: 1 }} />
-				) : shown.length === 0 ? (
+				) : items.length === 0 ? (
 					<Typography color="text.secondary" sx={{ mt: 1 }}>
 						Inga ändringar än. Här syns vem som laddar upp menyer, ändrar
 						öppettider och sidor.
 					</Typography>
 				) : (
 					<Box component="ul" sx={{ listStyle: 'none', m: 0, mt: 1, p: 0 }}>
-						{shown.map((item) => {
-							const isMe = item.username === me;
-							return (
-								<Box
-									component="li"
-									key={item.id}
-									sx={{
-										display: 'flex',
-										gap: 1.5,
-										py: 1.25,
-										'& + &': { borderTop: `1px solid ${brand.border}` },
-									}}>
-									<Avatar
-										sx={{
-											width: 30,
-											height: 30,
-											fontSize: '0.8rem',
-											fontWeight: 600,
-											bgcolor: isMe ? brand.green : brand.sageLight,
-											color: isMe ? '#fff' : brand.green,
-										}}>
-										{item.username[0]?.toUpperCase()}
-									</Avatar>
-									<Box sx={{ minWidth: 0, flex: 1 }}>
-										<Typography sx={{ wordBreak: 'break-word' }}>
-											<Box component="span" sx={{ fontWeight: 600 }}>
-												{isMe ? 'Du' : item.username}
-											</Box>{' '}
-											{describeActivity(item)}
-										</Typography>
-										<Typography
-											variant="body2"
-											color="text.secondary"
-											title={formatDateTime(item.createdAt)}>
-											{formatRelative(item.createdAt)}
-										</Typography>
-									</Box>
-								</Box>
-							);
-						})}
+						{items.map((item) => (
+							<ActivityRow
+								key={item.id}
+								item={item}
+								isMe={item.userId === me?.userId}
+								time={formatRelative(item.createdAt)}
+							/>
+						))}
 					</Box>
 				)}
-				{(hasMore || limit > FEW) && (
-					<Button
-						onClick={() => setLimit(limit > FEW ? FEW : MANY)}
-						sx={{ px: 0, mt: 0.5 }}>
-						{limit > FEW ? 'Visa färre' : 'Visa fler'}
-					</Button>
-				)}
 			</CardContent>
+			<Box sx={{ px: 2.5, pb: 2 }}>
+				<Button
+					component={RouterLink}
+					to="/andringar"
+					endIcon={<ArrowForward />}
+					sx={{ px: 0 }}>
+					Visa alla
+				</Button>
+			</Box>
 		</Card>
 	);
 }

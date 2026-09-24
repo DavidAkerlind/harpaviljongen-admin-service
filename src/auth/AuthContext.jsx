@@ -85,6 +85,7 @@ export function AuthProvider({ children }) {
 				login,
 				logout,
 				changePassword,
+				updateUser: setUser,
 			}}>
 			{children}
 		</AuthContext.Provider>

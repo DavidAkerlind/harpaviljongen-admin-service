@@ -1,6 +1,15 @@
 import { ROLES } from '../api';
 import { SITE_PAGES } from './sitePages';
 
+// Filter categories on the Ändringar page (same keys as the API)
+export const ACTIVITY_CATEGORIES = [
+	{ value: 'menus', label: 'Menyer' },
+	{ value: 'openingHours', label: 'Öppettider' },
+	{ value: 'pages', label: 'Sidor' },
+	{ value: 'users', label: 'Användare' },
+	{ value: 'account', label: 'Konton och profiler' },
+];
+
 const LIST_LABELS = {
 	food: 'Meny',
 	wine: 'Vinlista',
@@ -55,6 +64,30 @@ export function describeActivity({ type, details = {} }) {
 			return `gav ${details.username} ett nytt lösenord`;
 		case 'user.delete':
 			return `tog bort användaren ${details.username}`;
+		case 'account.update': {
+			const parts = [];
+			if (details.username) {
+				parts.push(
+					`bytte användarnamn från ${details.username.from} till ${details.username.to}`
+				);
+			}
+			if (details.name) {
+				parts.push(
+					details.name.to
+						? `bytte namn till ${details.name.to}`
+						: 'tog bort sitt namn'
+				);
+			}
+			return joinSv(parts) || 'uppdaterade sin profil';
+		}
+		case 'account.avatar':
+			return details.action === 'removed'
+				? 'tog bort sin profilbild'
+				: details.action === 'changed'
+					? 'bytte profilbild'
+					: 'lade till en profilbild';
+		case 'account.password':
+			return 'bytte sitt lösenord';
 		default:
 			return type;
 	}
