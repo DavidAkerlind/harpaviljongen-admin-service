@@ -14,7 +14,10 @@ export function UploadPdfCard({ list, onSelect }) {
 				e.preventDefault();
 				setDragging(true);
 			}}
-			onDragLeave={() => setDragging(false)}
+			onDragLeave={(e) => {
+				// Moving over the card's own children also fires dragleave
+				if (!e.currentTarget.contains(e.relatedTarget)) setDragging(false);
+			}}
 			onDrop={(e) => {
 				e.preventDefault();
 				setDragging(false);
