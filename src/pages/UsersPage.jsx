@@ -18,6 +18,7 @@ import {
 import {
 	AdminPanelSettingsOutlined,
 	DeleteOutline,
+	KeyOutlined,
 	MoreVert,
 	PersonAddAlt1Outlined,
 	PersonOutline,
@@ -28,6 +29,7 @@ import { PageHeader } from '../components/PageHeader';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useNotify } from '../components/Notifications';
 import { CreateUserDialog } from '../components/users/CreateUserDialog';
+import { PasswordDialog } from '../components/PasswordDialog';
 import { formatDate } from '../utils/format';
 import { brand } from '../theme';
 
@@ -39,6 +41,7 @@ export function UsersPage() {
 	const [createOpen, setCreateOpen] = useState(false);
 	const [menu, setMenu] = useState(null); // { anchor, user }
 	const [confirm, setConfirm] = useState(null); // { kind: 'role' | 'delete', user }
+	const [passwordFor, setPasswordFor] = useState(null); // user getting a new password
 	const [busy, setBusy] = useState(false);
 
 	const load = useCallback(async () => {
@@ -220,6 +223,16 @@ export function UsersPage() {
 					{menu?.user.role === 'admin' ? 'Gör till personal' : 'Gör till admin'}
 				</MenuItem>
 				<MenuItem
+					onClick={() => {
+						setPasswordFor(menu.user);
+						setMenu(null);
+					}}>
+					<ListItemIcon>
+						<KeyOutlined />
+					</ListItemIcon>
+					Nytt lösenord
+				</MenuItem>
+				<MenuItem
 					onClick={() => openConfirm('delete')}
 					disabled={menu?.user.role !== 'employee'}
 					sx={{ color: 'error.main' }}>
@@ -236,6 +249,19 @@ export function UsersPage() {
 					/>
 				</MenuItem>
 			</Menu>
+
+			<PasswordDialog
+				open={Boolean(passwordFor)}
+				title={`Nytt lösenord för ${passwordFor?.username ?? ''}`}
+				description={`${passwordFor?.username ?? ''} loggas ut överallt och loggar sedan in med det nya lösenordet. Ge det till dem på ett säkert sätt.`}
+				submitText="Spara lösenord"
+				onSubmit={async ({ password }) => {
+					await api.resetUserPassword(passwordFor.userId, password);
+					notify(`${passwordFor.username} har fått ett nytt lösenord`);
+					setPasswordFor(null);
+				}}
+				onClose={() => setPasswordFor(null)}
+			/>
 
 			<CreateUserDialog
 				open={createOpen}

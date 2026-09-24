@@ -8,26 +8,23 @@ import {
 	DialogContent,
 	DialogTitle,
 	FormControlLabel,
-	IconButton,
-	InputAdornment,
 	Radio,
 	RadioGroup,
 	TextField,
 	Typography,
 } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { api, ROLES } from '../../api';
+import { PasswordField } from '../PasswordField';
+import { MIN_PASSWORD, passwordProblem } from '../../utils/password';
 import { brand } from '../../theme';
 
 // Same rules as the API
 const USERNAME_PATTERN = /^[\p{L}\p{N}._-]{3,30}$/u;
-const MIN_PASSWORD = 8;
 
 const EMPTY = { username: '', password: '', role: 'employee' };
 
 export function CreateUserDialog({ open, onClose, onCreated }) {
 	const [form, setForm] = useState(EMPTY);
-	const [showPassword, setShowPassword] = useState(false);
 	const [touched, setTouched] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState(null);
@@ -38,17 +35,11 @@ export function CreateUserDialog({ open, onClose, onCreated }) {
 	const usernameProblem = !USERNAME_PATTERN.test(username)
 		? '3–30 tecken: bokstäver, siffror, punkt, - eller _'
 		: null;
-	const passwordProblem =
-		form.password.length < MIN_PASSWORD
-			? `Minst ${MIN_PASSWORD} tecken`
-			: form.password.length > 72
-				? 'Högst 72 tecken'
-				: null;
+	const passwordError = passwordProblem(form.password);
 
 	const close = () => {
 		if (saving) return;
 		setForm(EMPTY);
-		setShowPassword(false);
 		setTouched(false);
 		setError(null);
 		onClose();
@@ -57,13 +48,12 @@ export function CreateUserDialog({ open, onClose, onCreated }) {
 	const submit = async (e) => {
 		e.preventDefault();
 		setTouched(true);
-		if (usernameProblem || passwordProblem) return;
+		if (usernameProblem || passwordError) return;
 		setSaving(true);
 		setError(null);
 		try {
 			const user = await api.createUser({ ...form, username });
 			setForm(EMPTY);
-			setShowPassword(false);
 			setTouched(false);
 			onCreated(user);
 		} catch (err) {
@@ -106,36 +96,17 @@ export function CreateUserDialog({ open, onClose, onCreated }) {
 					}}
 					sx={{ mt: 1 }}
 				/>
-				<TextField
+				<PasswordField
 					label="Lösenord"
-					type={showPassword ? 'text' : 'password'}
 					value={form.password}
 					onChange={set('password')}
-					error={touched && Boolean(passwordProblem)}
+					error={touched && Boolean(passwordError)}
 					helperText={
-						touched && passwordProblem
-							? passwordProblem
+						touched && passwordError
+							? passwordError
 							: `Minst ${MIN_PASSWORD} tecken. Ge det till personen på ett säkert sätt.`
 					}
 					disabled={saving}
-					slotProps={{
-						htmlInput: { autoComplete: 'new-password' },
-						input: {
-							endAdornment: (
-								<InputAdornment position="end">
-									<IconButton
-										onClick={() => setShowPassword((v) => !v)}
-										aria-label={
-											showPassword ? 'Dölj lösenord' : 'Visa lösenord'
-										}
-										edge="end"
-										size="small">
-										{showPassword ? <VisibilityOff /> : <Visibility />}
-									</IconButton>
-								</InputAdornment>
-							),
-						},
-					}}
 				/>
 
 				<Box>

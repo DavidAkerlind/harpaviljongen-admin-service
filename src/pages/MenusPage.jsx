@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import {
 	DeleteOutline,
+	EditOutlined,
 	OpenInNew,
 	Public,
 	PublicOff,
@@ -30,6 +31,7 @@ import { PdfThumbnail } from '../components/pdf/PdfThumbnail';
 import { PdfPreviewDialog } from '../components/pdf/PdfPreviewDialog';
 import { UploadPdfDialog } from '../components/pdf/UploadPdfDialog';
 import { UploadPdfCard } from '../components/pdf/UploadPdfCard';
+import { RenamePdfDialog } from '../components/pdf/RenamePdfDialog';
 import { formatBytes, formatDate, formatDateTime } from '../utils/format';
 import { brand } from '../theme';
 
@@ -76,6 +78,7 @@ function PdfManager({ list }) {
 	const [preview, setPreview] = useState(null);
 	const [confirm, setConfirm] = useState(null); // { kind: 'delete' | 'deactivate', pdf }
 	const [busy, setBusy] = useState(false);
+	const [renaming, setRenaming] = useState(null);
 
 	const load = useCallback(async () => {
 		setError(null);
@@ -185,9 +188,11 @@ function PdfManager({ list }) {
 									size="small"
 									sx={{ mb: 1 }}
 								/>
-								<Typography variant="h2" sx={{ wordBreak: 'break-word' }}>
-									{active.title || active.originalName}
-								</Typography>
+								<TitleWithRename
+									variant="h2"
+									title={active.title || active.originalName}
+									onRename={() => setRenaming(active)}
+								/>
 								<Typography
 									variant="body2"
 									color="text.secondary"
@@ -304,14 +309,10 @@ function PdfManager({ list }) {
 											display: 'flex',
 											flexDirection: 'column',
 										}}>
-										<Typography
-											sx={{
-												fontWeight: 600,
-												lineHeight: 1.3,
-												wordBreak: 'break-word',
-											}}>
-											{pdf.title || pdf.originalName}
-										</Typography>
+										<TitleWithRename
+											title={pdf.title || pdf.originalName}
+											onRename={() => setRenaming(pdf)}
+										/>
 										<Typography
 											variant="body2"
 											color="text.secondary"
@@ -388,6 +389,18 @@ function PdfManager({ list }) {
 				}}
 			/>
 
+			<RenamePdfDialog
+				key={renaming?._id}
+				pdf={renaming}
+				onClose={() => setRenaming(null)}
+				onRenamed={(pdf) => {
+					setRenaming(null);
+					notify(`Bytt namn till ${name(pdf)}`);
+					if (preview?._id === pdf._id) setPreview(pdf);
+					load();
+				}}
+			/>
+
 			<PdfPreviewDialog
 				pdf={preview}
 				busy={busy}
@@ -437,3 +450,30 @@ const gridSx = {
 	},
 	gap: 2,
 };
+
+// The PDF's name with a small pencil to rename it
+function TitleWithRename({ title, variant, onRename }) {
+	return (
+		<Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5 }}>
+			<Typography
+				variant={variant}
+				sx={{
+					flex: 1,
+					minWidth: 0,
+					wordBreak: 'break-word',
+					...(variant ? {} : { fontWeight: 600, lineHeight: 1.3 }),
+				}}>
+				{title}
+			</Typography>
+			<Tooltip title="Byt namn">
+				<IconButton
+					size="small"
+					onClick={onRename}
+					aria-label={`Byt namn på ${title}`}
+					sx={{ mt: -0.5, mr: -0.75, color: 'text.secondary' }}>
+					<EditOutlined fontSize="small" />
+				</IconButton>
+			</Tooltip>
+		</Box>
+	);
+}

@@ -50,3 +50,20 @@ export const pdfThumbnailUrl = (url, width = 480) => {
 		.replace('/image/upload/', `/image/upload/pg_1,w_${width},c_limit,q_auto/`)
 		.replace(/\.pdf$/i, '.jpg');
 };
+
+// "nyss", "för 5 min sedan", "idag kl. 14:05", "igår kl. 14:05", "12 okt. 2026 kl. 14:05"
+export const formatRelative = (value, now = new Date()) => {
+	const date = new Date(value);
+	if (Number.isNaN(date.getTime())) return '';
+	const minutes = Math.floor((now - date) / 60000);
+	if (minutes < 1) return 'nyss';
+	if (minutes < 60) return `för ${minutes} min sedan`;
+	const time = timeFormat.format(date);
+	const startOfToday = new Date(now);
+	startOfToday.setHours(0, 0, 0, 0);
+	if (date >= startOfToday) return `idag kl. ${time}`;
+	if (date >= new Date(startOfToday.getTime() - 86400000)) {
+		return `igår kl. ${time}`;
+	}
+	return formatDateTime(date);
+};

@@ -23,6 +23,11 @@ export const api = {
 	login: (username, password) =>
 		client.post('/auth/login', { username, password }).then((r) => r.data),
 	me: () => client.get('/auth/me').then((r) => r.data),
+	// Returns { token, user }; the old token stops working
+	changePassword: (currentPassword, newPassword) =>
+		client
+			.put('/auth/password', { currentPassword, newPassword })
+			.then((r) => r.data),
 
 	// Öppettider
 	getOpeningHours: () => client.get('/openingHours').then((r) => r.data ?? []),
@@ -55,7 +60,13 @@ export const api = {
 		client.patch(`/menu-pdfs/${id}/activate`).then((r) => r.data),
 	deactivatePdf: (id) =>
 		client.patch(`/menu-pdfs/${id}/deactivate`).then((r) => r.data),
+	renamePdf: (id, title) =>
+		client.patch(`/menu-pdfs/${id}`, { title }).then((r) => r.data),
 	deletePdf: (id) => client.delete(`/menu-pdfs/${id}`).then((r) => r.data),
+
+	// Senaste ändringar
+	getActivity: (limit = 8) =>
+		client.get('/activity', { params: { limit } }).then((r) => r.data ?? []),
 
 	// Användare (bara admin)
 	getUsers: () => client.get('/users').then((r) => r.data ?? []),
@@ -63,6 +74,8 @@ export const api = {
 		client.post('/users', { username, password, role }).then((r) => r.data),
 	updateUserRole: (userId, role) =>
 		client.patch(`/users/${userId}`, { role }).then((r) => r.data),
+	resetUserPassword: (userId, password) =>
+		client.put(`/users/${userId}/password`, { password }).then((r) => r.data),
 	deleteUser: (userId) => client.delete(`/users/${userId}`).then((r) => r.data),
 
 	// Status
