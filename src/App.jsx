@@ -1,117 +1,72 @@
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, CssBaseline } from '@mui/material';
-import { MenuProvider } from './contexts/MenuContext.jsx';
-import { theme } from './utils/theme';
-import { Navbar } from './components/Navbar/Navbar';
-import { MenuList } from './components/MenuList/MenuList';
-import { MenuEditor } from './components/MenuEditor/MenuEditor';
-import { ItemList } from './components/ItemList/ItemList';
-import { ItemEditor } from './components/ItemEditor/ItemEditor';
-import { AuthProvider } from './contexts/AuthContext';
-import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
-import { LoginPage } from './pages/LoginPage/LoginPage';
-import { EventEditor } from './components/EventEditor/EventEditor';
-import { OpeningHoursEditor } from './components/OpeningHoursEditor/OpeningHoursEditor';
-import { EventList } from './components/EventList/EventList.jsx';
-import { WineListManager } from './components/WineListManager/WineListManager';
-import { WineListOverview } from './components/WineListOverview/WineListOverview';
-import { WineEditPage } from './components/WineEditPage/WineEditPage';
-import { AddWinePage } from './components/AddWinePage/AddWinePage';
+import {
+	BrowserRouter,
+	Navigate,
+	Route,
+	Routes,
+	useLocation,
+} from 'react-router-dom';
+import {
+	Box,
+	CircularProgress,
+	CssBaseline,
+	ThemeProvider,
+} from '@mui/material';
+import { theme } from './theme';
+import { AuthProvider, useAuth } from './auth/AuthContext';
+import { NotificationProvider } from './components/Notifications';
+import { AppLayout } from './components/AppLayout';
+import { LoginPage } from './pages/LoginPage';
+import { OverviewPage } from './pages/OverviewPage';
+import { MenusPage } from './pages/MenusPage';
+import { OpeningHoursPage } from './pages/OpeningHoursPage';
+import { PagesPage } from './pages/PagesPage';
 
-//  PAGES
-import { SearchPage } from './pages/SearchPage/SearchPage';
-import { DashboardPage } from './pages/DashboardPage/DashboardPage';
+function RequireAuth({ children }) {
+	const { status } = useAuth();
+	const location = useLocation();
 
-function App() {
+	if (status === 'checking') {
+		return (
+			<Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
+				<CircularProgress />
+			</Box>
+		);
+	}
+	if (status !== 'signedIn') {
+		return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+	}
+	return children;
+}
+
+export default function App() {
 	return (
-		<AuthProvider>
-			<ThemeProvider theme={theme}>
-				<CssBaseline />
-				<MenuProvider>
-					<Router>
-						<Navbar />
+		<ThemeProvider theme={theme}>
+			<CssBaseline />
+			<NotificationProvider>
+				<AuthProvider>
+					<BrowserRouter>
 						<Routes>
 							<Route path="/login" element={<LoginPage />} />
 							<Route
-								path="/*"
 								element={
-									<ProtectedRoute>
-										<Routes>
-											{/* Your existing routes */}
-											<Route
-												path="/"
-												element={<DashboardPage />}
-											/>
-											<Route
-												path="/menus"
-												element={<MenuList />}
-											/>
-											<Route
-												path="/menu/new"
-												element={<MenuEditor />}
-											/>
-											<Route
-												path="/menu/:menuId"
-												element={<MenuEditor />}
-											/>
-											<Route
-												path="/menu/:menuId/items"
-												element={<ItemList />}
-											/>
-											<Route
-												path="/menu/:menuId/items/new"
-												element={<ItemEditor />}
-											/>
-											<Route
-												path="/menu/:menuId/items/:itemId"
-												element={<ItemEditor />}
-											/>
-											<Route
-												path="/search"
-												element={<SearchPage />}
-											/>
-											<Route
-												path="/events"
-												element={<EventList />}
-											/>
-											<Route
-												path="/events/new"
-												element={<EventEditor />}
-											/>
-											<Route
-												path="/events/:eventId"
-												element={<EventEditor />}
-											/>
-											<Route
-												path="/opening-hours"
-												element={<OpeningHoursEditor />}
-											/>
-											<Route
-												path="/wine-lists"
-												element={<WineListManager />}
-											/>
-											<Route
-												path="/wine-lists/:id"
-												element={<WineListOverview />}
-											/>
-											<Route
-												path="/wine-lists/:id/wine/:wineId"
-												element={<WineEditPage />}
-											/>
-											<Route
-												path="/wine-lists/:id/add-wine"
-												element={<AddWinePage />}
-											/>
-										</Routes>
-									</ProtectedRoute>
-								}
-							/>
+									<RequireAuth>
+										<AppLayout />
+									</RequireAuth>
+								}>
+								<Route index element={<OverviewPage />} />
+								<Route
+									path="menyer"
+									element={<Navigate to="/menyer/meny" replace />}
+								/>
+								<Route path="menyer/:list" element={<MenusPage />} />
+								<Route path="oppettider" element={<OpeningHoursPage />} />
+								<Route path="sidor" element={<PagesPage />} />
+								<Route path="*" element={<Navigate to="/" replace />} />
+							</Route>
 						</Routes>
-					</Router>
-				</MenuProvider>
-			</ThemeProvider>
-		</AuthProvider>
+					</BrowserRouter>
+				</AuthProvider>
+			</NotificationProvider>
+		</ThemeProvider>
 	);
 }
-
-export default App;
