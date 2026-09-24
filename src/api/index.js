@@ -1,5 +1,17 @@
 import { client, SITE_URL } from './client';
 
+// Roller i API:t: admin = allt + användare, employee = menyer, öppettider och sidor
+export const ROLES = {
+	employee: {
+		label: 'Personal',
+		description: 'Menyer, öppettider och sidor',
+	},
+	admin: {
+		label: 'Admin',
+		description: 'Allt, plus lägga till och ta bort användare',
+	},
+};
+
 // PDF-typerna i API:t: food = Meny, wine = Vinlista
 export const PDF_LISTS = {
 	meny: { type: 'food', label: 'Meny', noun: 'menyn' },
@@ -44,6 +56,14 @@ export const api = {
 	deactivatePdf: (id) =>
 		client.patch(`/menu-pdfs/${id}/deactivate`).then((r) => r.data),
 	deletePdf: (id) => client.delete(`/menu-pdfs/${id}`).then((r) => r.data),
+
+	// Användare (bara admin)
+	getUsers: () => client.get('/users').then((r) => r.data ?? []),
+	createUser: ({ username, password, role }) =>
+		client.post('/users', { username, password, role }).then((r) => r.data),
+	updateUserRole: (userId, role) =>
+		client.patch(`/users/${userId}`, { role }).then((r) => r.data),
+	deleteUser: (userId) => client.delete(`/users/${userId}`).then((r) => r.data),
 
 	// Status
 	getHealth: async () => {

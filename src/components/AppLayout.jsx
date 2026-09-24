@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
 	AppBar,
@@ -12,6 +13,8 @@ import {
 	ListItemButton,
 	ListItemIcon,
 	ListItemText,
+	Menu,
+	MenuItem,
 	Paper,
 	Toolbar,
 	Tooltip,
@@ -24,8 +27,10 @@ import {
 	WebOutlined,
 	OpenInNew,
 	Logout,
+	PeopleOutline,
 } from '@mui/icons-material';
 import { useAuth } from '../auth/AuthContext';
+import { ROLES } from '../api';
 import { SITE_URL } from '../api/client';
 import { brand } from '../theme';
 import hareLogo from '../assets/hare-logo-white.svg';
@@ -43,6 +48,13 @@ const NAV_ITEMS = [
 	{ label: 'Öppettider', to: '/oppettider', icon: <ScheduleOutlined /> },
 	{ label: 'Sidor', to: '/sidor', icon: <WebOutlined /> },
 ];
+
+// Only for admins: in the sidebar on desktop, in the account menu on phones
+const USERS_ITEM = {
+	label: 'Användare',
+	to: '/anvandare',
+	icon: <PeopleOutline />,
+};
 
 const isActive = (item, pathname) =>
 	item.to === '/'
@@ -75,9 +87,25 @@ function Brand() {
 	);
 }
 
+function UserAvatar({ user, size = 32 }) {
+	return (
+		<Avatar
+			sx={{
+				width: size,
+				height: size,
+				bgcolor: brand.moss,
+				color: '#fff',
+				fontSize: Math.round(size * 0.45),
+			}}>
+			{user?.username?.[0]?.toUpperCase()}
+		</Avatar>
+	);
+}
+
 function Sidebar() {
 	const { pathname } = useLocation();
-	const { user, logout } = useAuth();
+	const { user, isAdmin, logout } = useAuth();
+	const items = isAdmin ? [...NAV_ITEMS, USERS_ITEM] : NAV_ITEMS;
 
 	return (
 		<Box
@@ -94,7 +122,7 @@ function Sidebar() {
 			}}>
 			<Brand />
 			<List sx={{ mt: 4, display: 'grid', gap: 0.5 }}>
-				{NAV_ITEMS.map((item) => {
+				{items.map((item) => {
 					const active = isActive(item, pathname);
 					return (
 						<ListItemButton
@@ -130,18 +158,15 @@ function Sidebar() {
 				</Button>
 				<Divider sx={{ borderColor: 'rgba(255,255,255,0.12)' }} />
 				<Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-					<Avatar
-						sx={{
-							width: 32,
-							height: 32,
-							bgcolor: brand.moss,
-							fontSize: '0.9rem',
-						}}>
-						{user?.username?.[0]?.toUpperCase()}
-					</Avatar>
-					<Typography sx={{ flex: 1, fontSize: '0.9rem' }} noWrap>
-						{user?.username}
-					</Typography>
+					<UserAvatar user={user} />
+					<Box sx={{ flex: 1, minWidth: 0, lineHeight: 1.2 }}>
+						<Typography sx={{ fontSize: '0.9rem' }} noWrap>
+							{user?.username}
+						</Typography>
+						<Typography sx={{ fontSize: '0.75rem', opacity: 0.65 }}>
+							{ROLES[user?.role]?.label}
+						</Typography>
+					</Box>
 					<Tooltip title="Logga ut">
 						<IconButton
 							onClick={logout}
@@ -156,9 +181,59 @@ function Sidebar() {
 	);
 }
 
+function AccountMenu() {
+	const { user, isAdmin, logout } = useAuth();
+	const [anchor, setAnchor] = useState(null);
+	const close = () => setAnchor(null);
+
+	return (
+		<>
+			<IconButton
+				onClick={(e) => setAnchor(e.currentTarget)}
+				aria-label="Konto"
+				aria-haspopup="menu"
+				sx={{ p: 0.5 }}>
+				<UserAvatar user={user} size={30} />
+			</IconButton>
+			<Menu
+				anchorEl={anchor}
+				open={Boolean(anchor)}
+				onClose={close}
+				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+				transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+				slotProps={{ paper: { sx: { minWidth: 220, mt: 1 } } }}>
+				<Box sx={{ px: 2, py: 1 }}>
+					<Typography sx={{ fontWeight: 600 }} noWrap>
+						{user?.username}
+					</Typography>
+					<Typography variant="body2" color="text.secondary">
+						{ROLES[user?.role]?.label}
+					</Typography>
+				</Box>
+				<Divider />
+				{isAdmin && (
+					<MenuItem component={NavLink} to={USERS_ITEM.to} onClick={close}>
+						<ListItemIcon>{USERS_ITEM.icon}</ListItemIcon>
+						{USERS_ITEM.label}
+					</MenuItem>
+				)}
+				<MenuItem
+					onClick={() => {
+						close();
+						logout();
+					}}>
+					<ListItemIcon>
+						<Logout />
+					</ListItemIcon>
+					Logga ut
+				</MenuItem>
+			</Menu>
+		</>
+	);
+}
+
 function MobileBars() {
 	const { pathname } = useLocation();
-	const { logout } = useAuth();
 	const current = NAV_ITEMS.findIndex((item) => isActive(item, pathname));
 
 	return (
@@ -179,9 +254,7 @@ function MobileBars() {
 						aria-label="Öppna hemsidan">
 						<OpenInNew />
 					</IconButton>
-					<IconButton color="inherit" onClick={logout} aria-label="Logga ut">
-						<Logout />
-					</IconButton>
+					<AccountMenu />
 				</Toolbar>
 			</AppBar>
 			<Paper

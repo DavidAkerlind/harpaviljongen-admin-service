@@ -35,6 +35,8 @@ export const tokenStore = {
 
 // Swedish text for the API errors staff can actually run into
 const SWEDISH_STATUS_MESSAGES = {
+	403: 'Du har inte behörighet att göra det här.',
+	409: 'Användarnamnet är redan taget.',
 	413: 'Filen är för stor (max 10 MB).',
 	429: 'För många inloggningsförsök. Vänta en stund och försök igen.',
 };

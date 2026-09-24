@@ -20,6 +20,7 @@ import { OverviewPage } from './pages/OverviewPage';
 import { MenusPage } from './pages/MenusPage';
 import { OpeningHoursPage } from './pages/OpeningHoursPage';
 import { PagesPage } from './pages/PagesPage';
+import { UsersPage } from './pages/UsersPage';
 
 function RequireAuth({ children }) {
 	const { status } = useAuth();
@@ -36,6 +37,11 @@ function RequireAuth({ children }) {
 		return <Navigate to="/login" replace state={{ from: location.pathname }} />;
 	}
 	return children;
+}
+
+function RequireAdmin({ children }) {
+	const { isAdmin } = useAuth();
+	return isAdmin ? children : <Navigate to="/" replace />;
 }
 
 export default function App() {
@@ -61,6 +67,14 @@ export default function App() {
 								<Route path="menyer/:list" element={<MenusPage />} />
 								<Route path="oppettider" element={<OpeningHoursPage />} />
 								<Route path="sidor" element={<PagesPage />} />
+								<Route
+									path="anvandare"
+									element={
+										<RequireAdmin>
+											<UsersPage />
+										</RequireAdmin>
+									}
+								/>
 								<Route path="*" element={<Navigate to="/" replace />} />
 							</Route>
 						</Routes>

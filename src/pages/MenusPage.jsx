@@ -16,7 +16,6 @@ import {
 	useMediaQuery,
 } from '@mui/material';
 import {
-	Add,
 	DeleteOutline,
 	OpenInNew,
 	Public,
@@ -30,6 +29,7 @@ import { useNotify } from '../components/Notifications';
 import { PdfThumbnail } from '../components/pdf/PdfThumbnail';
 import { PdfPreviewDialog } from '../components/pdf/PdfPreviewDialog';
 import { UploadPdfDialog } from '../components/pdf/UploadPdfDialog';
+import { UploadPdfCard } from '../components/pdf/UploadPdfCard';
 import { formatBytes, formatDate, formatDateTime } from '../utils/format';
 import { brand } from '../theme';
 
@@ -71,7 +71,8 @@ function PdfManager({ list }) {
 	const isPhone = useMediaQuery((theme) => theme.breakpoints.down('sm'));
 	const [pdfs, setPdfs] = useState(null);
 	const [error, setError] = useState(null);
-	const [uploadOpen, setUploadOpen] = useState(false);
+	// key remounts the dialog on every open; file = a PDF dropped on the upload card
+	const [upload, setUpload] = useState({ open: false, file: null, key: 0 });
 	const [preview, setPreview] = useState(null);
 	const [confirm, setConfirm] = useState(null); // { kind: 'delete' | 'deactivate', pdf }
 	const [busy, setBusy] = useState(false);
@@ -88,6 +89,10 @@ function PdfManager({ list }) {
 	useEffect(() => {
 		load();
 	}, [load]);
+
+	const openUpload = (file) =>
+		setUpload((prev) => ({ open: true, file, key: prev.key + 1 }));
+	const closeUpload = () => setUpload((prev) => ({ ...prev, open: false }));
 
 	const active = pdfs?.find((pdf) => pdf.isActive);
 	const name = (pdf) => `“${pdf.title || pdf.originalName}”`;
@@ -145,23 +150,9 @@ function PdfManager({ list }) {
 		<Box sx={{ display: 'grid', gap: 4 }}>
 			{/* Aktiv just nu */}
 			<Box>
-				<Box
-					sx={{
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'space-between',
-						gap: 2,
-						mb: 1.5,
-					}}>
-					<Typography variant="h2">Visas på hemsidan nu</Typography>
-					<Button
-						variant="contained"
-						startIcon={<Add />}
-						onClick={() => setUploadOpen(true)}
-						sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
-						Ladda upp ny
-					</Button>
-				</Box>
+				<Typography variant="h2" sx={{ mb: 1.5 }}>
+					Visas på hemsidan nu
+				</Typography>
 				{pdfs === null ? (
 					<Skeleton variant="rounded" height={190} />
 				) : active ? (
@@ -257,158 +248,137 @@ function PdfManager({ list }) {
 					Alla uppladdade{pdfs?.length ? ` (${pdfs.length})` : ''}
 				</Typography>
 				<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-					Klicka på en PDF för att förhandsgranska den. Bara en i taget kan
-					visas på hemsidan.
+					{pdfs?.length === 0
+						? `Inga PDF:er uppladdade än. Ladda upp ${list.noun} för att komma igång.`
+						: 'Klicka på en PDF för att förhandsgranska den. Bara en i taget kan visas på hemsidan.'}
 				</Typography>
 
-				{pdfs === null ? (
-					<Box sx={gridSx}>
-						{[1, 2, 3].map((i) => (
-							<Skeleton key={i} variant="rounded" height={300} />
-						))}
-					</Box>
-				) : pdfs.length === 0 ? (
-					<Box
-						sx={{
-							border: `2px dashed ${brand.border}`,
-							borderRadius: 3,
-							p: 4,
-							textAlign: 'center',
-						}}>
-						<Typography sx={{ fontWeight: 600 }}>
-							Inga PDF:er uppladdade än
-						</Typography>
-						<Typography color="text.secondary" sx={{ mb: 2 }}>
-							Ladda upp {list.noun} som PDF för att komma igång.
-						</Typography>
-						<Button
-							variant="contained"
-							startIcon={<Add />}
-							onClick={() => setUploadOpen(true)}>
-							Ladda upp {list.label.toLowerCase()}
-						</Button>
-					</Box>
-				) : (
-					<Box sx={gridSx}>
-						{pdfs.map((pdf) => (
-							<Card
-								key={pdf._id}
-								sx={{
-									display: 'flex',
-									flexDirection: { xs: 'row', sm: 'column' },
-									borderColor: pdf.isActive ? 'success.main' : undefined,
-								}}>
-								<Box
+				<Box sx={gridSx}>
+					<UploadPdfCard list={list} onSelect={openUpload} />
+					{pdfs === null
+						? [1, 2].map((i) => (
+								<Skeleton key={i} variant="rounded" sx={{ minHeight: 300 }} />
+							))
+						: pdfs.map((pdf) => (
+								<Card
+									key={pdf._id}
 									sx={{
-										p: 1.5,
-										pr: { xs: 0, sm: 1.5 },
-										pb: { sm: 0 },
-										position: 'relative',
-										width: { xs: 96, sm: 'auto' },
-										flexShrink: 0,
-									}}>
-									<PdfThumbnail
-										url={pdf.url}
-										title={pdf.title}
-										onClick={() => setPreview(pdf)}
-										compact={isPhone}
-									/>
-									{pdf.isActive && (
-										<Chip
-											label="Aktiv"
-											color="success"
-											size="small"
-											sx={{
-												position: 'absolute',
-												top: 20,
-												left: 20,
-												display: { xs: 'none', sm: 'flex' },
-											}}
-										/>
-									)}
-								</Box>
-								<Box
-									sx={{
-										p: 1.5,
-										flex: 1,
-										minWidth: 0,
 										display: 'flex',
-										flexDirection: 'column',
+										flexDirection: { xs: 'row', sm: 'column' },
+										borderColor: pdf.isActive ? 'success.main' : undefined,
 									}}>
-									<Typography
-										sx={{
-											fontWeight: 600,
-											lineHeight: 1.3,
-											wordBreak: 'break-word',
-										}}>
-										{pdf.title || pdf.originalName}
-									</Typography>
-									<Typography
-										variant="body2"
-										color="text.secondary"
-										sx={{ mt: 0.25 }}>
-										{formatDate(pdf.uploadedAt)}
-										{pdf.bytes ? ` · ${formatBytes(pdf.bytes)}` : ''}
-									</Typography>
 									<Box
 										sx={{
-											display: 'flex',
-											alignItems: 'center',
-											gap: 0.5,
-											mt: 'auto',
-											pt: 1.5,
+											p: 1.5,
+											pr: { xs: 0, sm: 1.5 },
+											pb: { sm: 0 },
+											position: 'relative',
+											width: { xs: 96, sm: 'auto' },
+											flexShrink: 0,
 										}}>
-										{pdf.isActive ? (
-											<Typography
-												variant="body2"
+										<PdfThumbnail
+											url={pdf.url}
+											title={pdf.title}
+											onClick={() => setPreview(pdf)}
+											compact={isPhone}
+										/>
+										{pdf.isActive && (
+											<Chip
+												label="Aktiv"
+												color="success"
+												size="small"
 												sx={{
-													color: 'success.main',
-													fontWeight: 600,
-													flex: 1,
-												}}>
-												Visas nu
-											</Typography>
-										) : (
-											<Button
-												size="small"
-												variant="outlined"
-												disabled={busy}
-												onClick={() => activate(pdf)}
-												sx={{ flex: 1, whiteSpace: 'nowrap' }}>
-												Visa på hemsidan
-											</Button>
+													position: 'absolute',
+													top: 20,
+													left: 20,
+													display: { xs: 'none', sm: 'flex' },
+												}}
+											/>
 										)}
-										<Tooltip title="Förhandsgranska">
-											<IconButton
-												size="small"
-												onClick={() => setPreview(pdf)}
-												aria-label="Förhandsgranska">
-												<VisibilityOutlined fontSize="small" />
-											</IconButton>
-										</Tooltip>
-										<Tooltip title="Ta bort">
-											<IconButton
-												size="small"
-												disabled={busy}
-												onClick={() => setConfirm({ kind: 'delete', pdf })}
-												aria-label="Ta bort">
-												<DeleteOutline fontSize="small" />
-											</IconButton>
-										</Tooltip>
 									</Box>
-								</Box>
-							</Card>
-						))}
-					</Box>
-				)}
+									<Box
+										sx={{
+											p: 1.5,
+											flex: 1,
+											minWidth: 0,
+											display: 'flex',
+											flexDirection: 'column',
+										}}>
+										<Typography
+											sx={{
+												fontWeight: 600,
+												lineHeight: 1.3,
+												wordBreak: 'break-word',
+											}}>
+											{pdf.title || pdf.originalName}
+										</Typography>
+										<Typography
+											variant="body2"
+											color="text.secondary"
+											sx={{ mt: 0.25 }}>
+											{formatDate(pdf.uploadedAt)}
+											{pdf.bytes ? ` · ${formatBytes(pdf.bytes)}` : ''}
+										</Typography>
+										<Box
+											sx={{
+												display: 'flex',
+												alignItems: 'center',
+												gap: 0.5,
+												mt: 'auto',
+												pt: 1.5,
+											}}>
+											{pdf.isActive ? (
+												<Typography
+													variant="body2"
+													sx={{
+														color: 'success.main',
+														fontWeight: 600,
+														flex: 1,
+													}}>
+													Visas nu
+												</Typography>
+											) : (
+												<Button
+													size="small"
+													variant="outlined"
+													disabled={busy}
+													onClick={() => activate(pdf)}
+													sx={{ flex: 1, whiteSpace: 'nowrap' }}>
+													Visa på hemsidan
+												</Button>
+											)}
+											<Tooltip title="Förhandsgranska">
+												<IconButton
+													size="small"
+													onClick={() => setPreview(pdf)}
+													aria-label="Förhandsgranska">
+													<VisibilityOutlined fontSize="small" />
+												</IconButton>
+											</Tooltip>
+											<Tooltip title="Ta bort">
+												<IconButton
+													size="small"
+													disabled={busy}
+													onClick={() => setConfirm({ kind: 'delete', pdf })}
+													aria-label="Ta bort">
+													<DeleteOutline fontSize="small" />
+												</IconButton>
+											</Tooltip>
+										</Box>
+									</Box>
+								</Card>
+							))}
+				</Box>
 			</Box>
 
 			<UploadPdfDialog
-				open={uploadOpen}
+				key={upload.key}
+				open={upload.open}
+				initialFile={upload.file}
 				list={list}
-				onClose={() => setUploadOpen(false)}
+				onClose={closeUpload}
 				onUploaded={(pdf) => {
-					setUploadOpen(false);
+					closeUpload();
 					notify(
 						pdf.isActive
 							? `${name(pdf)} är uppladdad och visas nu på hemsidan`

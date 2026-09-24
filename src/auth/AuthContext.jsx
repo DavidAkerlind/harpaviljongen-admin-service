@@ -63,8 +63,11 @@ export function AuthProvider({ children }) {
 		setStatus('signedOut');
 	}, []);
 
+	const isAdmin = user?.role === 'admin';
+
 	return (
-		<AuthContext.Provider value={{ user, status, notice, login, logout }}>
+		<AuthContext.Provider
+			value={{ user, isAdmin, status, notice, login, logout }}>
 			{children}
 		</AuthContext.Provider>
 	);
