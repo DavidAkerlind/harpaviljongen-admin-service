@@ -43,7 +43,14 @@ export function AuthProvider({ children }) {
 	}, []);
 
 	const login = useCallback(async (username, password) => {
-		const { token, user } = await api.login(username, password);
+		const data = await api.login(username, password);
+		// An API from before this admin logs in without returning a token
+		if (!data?.token) {
+			throw new Error(
+				'API:t skickade ingen inloggningstoken. Är den nya API-versionen driftsatt?'
+			);
+		}
+		const { token, user } = data;
 		tokenStore.set(token);
 		setUser(user);
 		setNotice(null);
