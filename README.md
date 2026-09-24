@@ -1,188 +1,66 @@
-# Harpaviljongen Admin Service
+# Harpaviljongen Admin
 
-## 📖 Översikt
+Admin for [harpaviljongen.com](https://harpaviljongen.com), meant to run at **https://admin.harpaviljongen.com** (Cloudflare Pages).
+It covers what the restaurant actually updates:
 
-Harpaviljongen Admin Service är en modern webbapplikation byggd för att hantera administration av restaurang- och eventverksamhet. Tjänsten fungerar som ett komplett administrativt kontrollpanel för att hantera menyer, events, öppettider och systemövervakning.
+| Page | What it does |
+| --- | --- |
+| **Översikt** | Status of the website, API and database, plus what is live right now (menu, wine list, opening hours, visible pages). |
+| **Menyer** | Upload the *Meny* and *Vinlista* as PDF, preview them, choose which one the website links to, stop showing, delete. All uploads are kept until deleted. Only one per list is active. |
+| **Öppettider** | The whole week in one save. A switch per day for open/closed. |
+| **Sidor** | Show or hide *Chambre séparée*, *Evenemang* and *Galleri*, separately in the navbar and as a button on the homepage. Hidden pages still open with a direct link. |
 
-## 🛠️ Teknisk Stack
+The admin talks to the [Harpaviljongen API](https://github.com/DavidAkerlind/harpaviljongen-DB-API) on Render. Every change needs a login token from that API; reading is public.
+The API has more endpoints (menu items, events, wine lists) that this admin deliberately doesn't show.
 
-### Frontend
+## Tech
 
--   **React 18** - Modern komponentbaserat UI-ramverk
--   **Material-UI (MUI)** - Elegant designsystem och komponenter
--   **React Router** - Navigation och routing
--   **Axios** - HTTP-klient för API-kommunikation
--   **Vite** - Snabb utvecklingsserver och build-verktyg
+React 19, Vite, MUI 7, React Router, Axios. Swedish UI, light theme in the restaurant's green. Works on phones (bottom tab bar) and desktop (sidebar).
 
-### Backend Integration
-
--   **RESTful API** - Kommunicerar med Harpaviljongen Database API
--   **JWT Authentication** - Säker tokenbaserad autentisering
--   **Session Storage** - Säker tokenhantering
-
-## 🚀 Huvudfunktioner
-
-### 1. Dashboard
-
--   **Systemövervakning** - Realtidsövervakning av API- och databasstatus
--   **Statistik** - Överblick över menyer, items och events
--   **Snabbnavigation** - Direktlänkar till huvudfunktioner
-
-### 2. Menyhantering
-
--   **CRUD-operationer** - Skapa, läsa, uppdatera och ta bort menyer
--   **Itemhantering** - Hantera maträtter, priser och tillgänglighet
--   **Aktivering/Deaktivering** - Toggle-funktionalitet för items
--   **Kategorisering** - Organisera items efter typ
-
-### 3. Eventhantering
-
--   **Eventplanering** - Skapa och hantera events (DJ, vinprovning, privata events)
--   **Tidshantering** - Datum, start- och sluttider
--   **Kategorisering** - Olika eventtyper med färgkodning
--   **Beskrivningar** - Kort och lång beskrivning för events
-
-### 4. Öppettidehantering
-
--   **Veckoplaner** - Hantera öppettider för alla veckodagar
--   **Flexibilitet** - Enkelt uppdatera tider per dag
--   **Svenska veckonamn** - Måndag till Söndag
-
-### 5. Sökning
-
--   **Global sökning** - Sök genom alla menyer och items
--   **Snabb navigation** - Direkta länkar till sökresultat
-
-## 🔐 Säkerhet & Autentisering
-
-### Säkerhetsfunktioner
-
--   **JWT-tokens** - Säker autentisering med Bearer tokens
--   **Protected Routes** - Alla administrativa sidor kräver inloggning
--   **Session Management** - Automatisk utloggning vid tokenexpiration
--   **HTTPS** - Säker kommunikation med backend
-
-### Användarhantering
-
--   **Enkel inloggning** - Användarnamn och lösenord
--   **Automatisk omdirigering** - Till login vid unauthorized access
--   **Säker utloggning** - Rensar tokens och session
-
-## 📱 Användargränssnitt
-
-### Responsiv Design
-
--   **Mobile-first** - Optimerad för alla skärmstorlekar
--   **Hamburger-meny** - Mobilanpassad navigation
--   **Touch-friendly** - Stora knappar och touch-targets
-
-### UX-funktioner
-
--   **Loading States** - Visuell feedback under datahämtning
--   **Error Handling** - Tydliga felmeddelanden
--   **Confirm Dialogs** - Säkerhetsbekräftelse för kritiska operationer
--   **Fade Animations** - Mjuka övergångar mellan sidor
-
-## 🔄 API-integration
-
-### Endpoint-struktur
-
-```
-/api/menus - Menyhantering
-/api/events - Eventhantering
-/api/openingHours - Öppettidehantering
-/api/auth - Autentisering
-```
-
-### Datahantering
-
--   **Real-time updates** - Automatisk uppdatering av data
--   **Error recovery** - Robust felhantering
--   **Optimistic updates** - Snabb användarfeedback
-
-## 📊 Systemövervakning
-
-### Health Checks
-
--   **API-status** - Övervakar backend-tillgänglighet
--   **Response times** - Mäter API-latens
--   **Visual indicators** - Färgkodade statusindikatorer
-
-### Metrics
-
--   **Menu statistics** - Antal menyer och items
--   **Active items** - Procentuell fördelning
--   **Event tracking** - Kommande events
-
-## 🎯 Användningsområden
-
-### Restaurangpersonal
-
--   **Daglig menyuppdatering** - Snabbt aktivera/deaktivera rätter
--   **Prisändringar** - Enkelt uppdatera priser
--   **Specialmenyer** - Skapa säsongsmenyer
-
-### Eventkoordinatorer
-
--   **Eventplanering** - Planera DJ-kvällar, vinprovningar
--   **Gästinformation** - Hantera eventbeskrivningar
--   **Schemaläggning** - Koordinera eventtider
-
-### Restaurangchefer
-
--   **Överblick** - Dashboard med nyckelmetrics
--   **Systemstatus** - Övervaka teknisk drift
--   **Öppettider** - Hantera säsongsöppettider
-
-## 🔧 Installation
-
-### Utvecklingsmiljö
+## Run locally
 
 ```bash
 npm install
-npm run dev
+cp .env.example .env.local   # VITE_API_URL=http://localhost:7000/api
+npm run dev                  # http://localhost:5174
 ```
 
-### Miljövariabler
+Without `.env.local` the admin uses the **production** API, so changes affect the live website.
 
--   API-endpoints konfigureras i `apiService.js`
--   Växling mellan lokal och produktionsmiljö
+The full guide (local API with a test database, Postman, and the website side by side) is in the API repo: [docs/LOCAL_TESTING.md](https://github.com/DavidAkerlind/harpaviljongen-DB-API/blob/main/docs/LOCAL_TESTING.md).
 
-## 📈 Fördelar
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `VITE_API_URL` | `https://harpaviljongen-db-api.onrender.com/api` | API the admin uses |
+| `VITE_SITE_URL` | `https://harpaviljongen.com` | Links to the website and the status check |
 
-### Effektivitet
+## Deploy (Cloudflare Pages)
 
--   **Centraliserad hantering** - Allt på ett ställe
--   **Snabb respons** - Optimerad prestanda
--   **Intuitivt gränssnitt** - Kort inlärningskurva
+| Setting | Value |
+| --- | --- |
+| Project name | `harpaviljongen-admin` |
+| Production branch | `main` |
+| Build command | `npm run build` |
+| Output directory | `dist` |
+| Env variable | `NODE_VERSION=22` |
+| Custom domain | `admin.harpaviljongen.com` |
 
-### Tillförlitlighet
+`public/_redirects` sends every path to `index.html` (normal URLs like `/menyer/vinlista` work on reload).
+`public/_headers` and `robots.txt` keep the admin out of search engines.
 
--   **Robust felhantering** - Graceful degradation
--   **Data integrity** - Säker datahantering
--   **Backup-funktionalitet** - Säker datalagring
+Step-by-step, including the order to deploy API → admin → website, is in [docs/GO_LIVE.md](https://github.com/DavidAkerlind/harpaviljongen-DB-API/blob/main/docs/GO_LIVE.md) in the API repo.
 
-### Skalbarhet
+## Structure
 
--   **Modulär arkitektur** - Lätt att utöka
--   **API-driven** - Flexibel backend-integration
--   **Komponentbaserad** - Återanvändbara UI-komponenter
-
-## 🎨 Design Philosophy
-
-### Material Design
-
--   **Konsekvent UI** - Följer Material Design-principer
--   **Tillgänglighet** - WCAG-kompatibel design
--   **Färgkodning** - Intuitiv visuell feedback
-
-### Användarcentrerat
-
--   **Arbetsflödesoptimering** - Designat för daglig användning
--   **Minimal friktion** - Få klick till målet
--   **Kontextuell hjälp** - Tooltips och bekräftelser
-
-Harpaviljongen Admin Service är den kompletta lösningen för modern restaurangadministration - kombinerar kraftfull funktionalitet med elegant design för att göra daglig drift smidig och effektiv.
+```
+src/
+  api/          client.js (axios + token), index.js (all API calls)
+  auth/         AuthContext.jsx (login, logout, token check)
+  components/   AppLayout, PageHeader, ConfirmDialog, Notifications, pdf/*
+  pages/        OverviewPage, MenusPage, OpeningHoursPage, PagesPage, LoginPage
+  utils/        format.js (dates, sizes, days), sitePages.js
+  theme.js      colours and MUI theme
+```
 
 ---
 
