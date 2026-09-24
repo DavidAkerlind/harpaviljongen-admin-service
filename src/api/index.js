@@ -84,6 +84,9 @@ export const api = {
 		client.get('/activity', { params }).then((r) => r.data),
 	getActivityUsers: () =>
 		client.get('/activity/users').then((r) => r.data ?? []),
+	// Admins only. olderThan: '30d' | '3m' | '6m' | '1y' | 'all'. Returns { deleted }
+	clearActivity: (olderThan) =>
+		client.delete('/activity', { params: { olderThan } }).then((r) => r.data),
 
 	// Användare (bara admin)
 	getUsers: () => client.get('/users').then((r) => r.data ?? []),

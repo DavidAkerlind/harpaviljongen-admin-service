@@ -12,13 +12,19 @@ import {
 	TextField,
 	Typography,
 } from '@mui/material';
-import { ArrowBack, FilterAltOff } from '@mui/icons-material';
+import {
+	ArrowBack,
+	DeleteSweepOutlined,
+	FilterAltOff,
+} from '@mui/icons-material';
 import { api } from '../api';
 import { useAuth } from '../auth/AuthContext';
 import { PageHeader } from '../components/PageHeader';
 import { UserAvatar } from '../components/UserAvatar';
 import { ActivityRow } from '../components/activity/ActivityRow';
-import { ACTIVITY_CATEGORIES } from '../utils/activity';
+import { ClearLogDialog } from '../components/activity/ClearLogDialog';
+import { useNotify } from '../components/Notifications';
+import { ACTIVITY_CATEGORIES, RETENTION_TEXT } from '../utils/activity';
 import {
 	addDays,
 	formatDayHeading,
@@ -75,8 +81,13 @@ function periodRange(params) {
 }
 
 export function ActivityPage() {
-	const { user: me } = useAuth();
+	const { user: me, isAdmin } = useAuth();
+	const notify = useNotify();
 	const [params, setParams] = useSearchParams();
+	// Bumped after clearing the log, to fetch again
+	const [reloadKey, setReloadKey] = useState(0);
+	// key: the dialog starts fresh (new counts, nothing chosen) every time it opens
+	const [clear, setClear] = useState({ open: false, key: 0 });
 	const [people, setPeople] = useState([]);
 	const [result, setResult] = useState(null); // { items, total, hasMore }
 	const [error, setError] = useState(null);
@@ -104,7 +115,7 @@ export function ActivityPage() {
 			.getActivityUsers()
 			.then(setPeople)
 			.catch(() => setPeople([]));
-	}, []);
+	}, [reloadKey]);
 
 	useEffect(() => {
 		const request = ++latestRequest.current;
@@ -116,7 +127,7 @@ export function ActivityPage() {
 			.catch(
 				(err) => request === latestRequest.current && setError(err.message)
 			);
-	}, [query]);
+	}, [query, reloadKey]);
 
 	const loadMore = async () => {
 		setLoadingMore(true);
@@ -155,17 +166,16 @@ export function ActivityPage() {
 			to: value === 'range' ? params.get('to') : '',
 		});
 
-	// Group the list by day, keeping the order
+	// Group the list by day (the API sends newest first)
 	const days = useMemo(() => {
-		const groups = [];
+		const groups = new Map();
 		for (const item of result?.items ?? []) {
-			const key = toDayString(new Date(item.createdAt));
-			if (groups.at(-1)?.key !== key) {
-				groups.push({ key, date: new Date(item.createdAt), items: [] });
-			}
-			groups.at(-1).items.push(item);
+			const date = new Date(item.createdAt);
+			const key = toDayString(date);
+			if (!groups.has(key)) groups.set(key, { key, date, items: [] });
+			groups.get(key).items.push(item);
 		}
-		return groups;
+		return [...groups.values()];
 	}, [result]);
 
 	const todayString = toDayString(new Date());
@@ -189,8 +199,36 @@ export function ActivityPage() {
 			</Button>
 			<PageHeader
 				title="Alla ändringar"
-				description="Vem som ändrat vad i admin: menyer, öppettider, sidor, användare och profiler."
+				description={`Vem som ändrat vad i admin: menyer, öppettider, sidor, användare och profiler. Ändringar sparas i ${RETENTION_TEXT}.`}
+				actions={
+					isAdmin && (
+						<Button
+							variant="outlined"
+							startIcon={<DeleteSweepOutlined />}
+							onClick={() => setClear((c) => ({ open: true, key: c.key + 1 }))}
+							sx={{ bgcolor: brand.paper }}>
+							Rensa logg
+						</Button>
+					)
+				}
 			/>
+
+			{isAdmin && (
+				<ClearLogDialog
+					key={clear.key}
+					open={clear.open}
+					onClose={() => setClear((c) => ({ ...c, open: false }))}
+					onCleared={(deleted) => {
+						setClear((c) => ({ ...c, open: false }));
+						notify(
+							deleted === 1
+								? '1 ändring borttagen ur loggen'
+								: `${deleted} ändringar borttagna ur loggen`
+						);
+						setReloadKey((key) => key + 1);
+					}}
+				/>
+			)}
 
 			<Card sx={{ mb: 3 }}>
 				<CardContent

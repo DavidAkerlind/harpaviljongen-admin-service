@@ -8,7 +8,33 @@ export const ACTIVITY_CATEGORIES = [
 	{ value: 'pages', label: 'Sidor' },
 	{ value: 'users', label: 'Användare' },
 	{ value: 'account', label: 'Konton och profiler' },
+	{ value: 'log', label: 'Loggen' },
 ];
+
+// Entries older than this are deleted automatically by the API
+export const RETENTION_TEXT = 'ett år';
+
+// "Rensa logg": same values and cut-offs as the API
+export const CLEAR_OPTIONS = [
+	{ value: '30d', label: 'Äldre än 30 dagar', text: 'äldre än 30 dagar' },
+	{ value: '3m', label: 'Äldre än 3 månader', text: 'äldre än 3 månader' },
+	{ value: '6m', label: 'Äldre än 6 månader', text: 'äldre än 6 månader' },
+	{ value: '1y', label: 'Äldre än 1 år', text: 'äldre än 1 år' },
+	{ value: 'all', label: 'Allt', text: '' },
+];
+
+// Everything created before this date is deleted; null for 'all'
+export function clearCutoff(value, now = new Date()) {
+	const cutoff = new Date(now);
+	if (value === '30d') cutoff.setDate(cutoff.getDate() - 30);
+	else if (value === '3m') cutoff.setMonth(cutoff.getMonth() - 3);
+	else if (value === '6m') cutoff.setMonth(cutoff.getMonth() - 6);
+	else if (value === '1y') cutoff.setFullYear(cutoff.getFullYear() - 1);
+	else return null;
+	return cutoff;
+}
+
+const changes = (n) => `${n} ${n === 1 ? 'ändring' : 'ändringar'}`;
 
 const LIST_LABELS = {
 	food: 'Meny',
@@ -88,6 +114,12 @@ export function describeActivity({ type, details = {} }) {
 					: 'lade till en profilbild';
 		case 'account.password':
 			return 'bytte sitt lösenord';
+		case 'activity.clear': {
+			const option = CLEAR_OPTIONS.find((o) => o.value === details.olderThan);
+			return details.olderThan === 'all'
+				? `tömde loggen (${changes(details.deleted)})`
+				: `tog bort ${changes(details.deleted)} ${option?.text ?? ''} ur loggen`;
+		}
 		default:
 			return type;
 	}
