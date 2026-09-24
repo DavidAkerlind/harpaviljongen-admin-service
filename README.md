@@ -5,12 +5,14 @@ It covers what the restaurant actually updates:
 
 | Page | What it does |
 | --- | --- |
-| **Översikt** | Status of the website, API and database, what is live right now (menu, wine list, opening hours, visible pages), and **Senaste ändringar**: who changed what, newest first. |
+| **Översikt** | Status of the website, API and database, what is live right now (menu, wine list, opening hours, visible pages), and **Senaste ändringar**: who changed what, newest first. **Visa alla** opens *Alla ändringar*. |
+| **Alla ändringar** (`/andringar`) | Every change, grouped by day, with filters for date (today, yesterday, 7/30 days, one day or a period), category and person. The filters are in the address, so a filtered view can be reloaded or bookmarked. Changes are kept for 1 year; admins can delete older ones sooner with **Rensa logg** (older than 30 days, 3 months, 6 months, 1 year, or everything). |
 | **Menyer** | Upload the *Meny* and *Vinlista* as PDF (the dashed card first in the grid: click it or drop a PDF on it), preview them, rename them (pencil), choose which one the website links to, stop showing, delete. All uploads are kept until deleted. Only one per list is active. |
 | **Öppettider** | The whole week in one save. A switch per day for open/closed. |
 | **Sidor** | Show or hide *Chambre séparée*, *Evenemang* and *Galleri*, separately in the navbar and as a button on the homepage. Hidden pages still open with a direct link. |
 | **Användare** | Admins only. Add logins as *Personal* or *Admin*, change the role, set a new password for someone who forgot theirs, delete *Personal*. You can't change or delete yourself. On phones it's behind your initial top right. |
-| **Byt lösenord** | Everyone. Click your name at the bottom of the sidebar (on phones: your initial top right). Your other devices are logged out. |
+| **Min profil** (`/profil`) | Everyone. Profile picture (cropped to a square in the browser before upload), display name, username, password. Opened from your name at the bottom of the sidebar (on phones: your picture top right). |
+| **Byt lösenord** | Also directly in that menu. Your other devices are logged out. |
 
 **Roles:** *Personal* (`employee`) can do everything above except **Användare**. *Admin* can do everything. The API enforces this; the admin just hides what you can't use.
 
@@ -60,9 +62,9 @@ Step-by-step, including the order to deploy API → admin → website, is in [do
 src/
   api/          client.js (axios + token), index.js (all API calls)
   auth/         AuthContext.jsx (login, logout, token check, isAdmin)
-  components/   AppLayout, PageHeader, ConfirmDialog, Notifications, pdf/*, users/*
-  pages/        OverviewPage, MenusPage, OpeningHoursPage, PagesPage, UsersPage, LoginPage
-  utils/        format.js (dates, sizes, days), sitePages.js
+  components/   AppLayout, PageHeader, ConfirmDialog, Notifications, UserAvatar, PasswordDialog, activity/*, pdf/*, users/*
+  pages/        OverviewPage, ActivityPage, MenusPage, OpeningHoursPage, PagesPage, UsersPage, ProfilePage, LoginPage
+  utils/        format.js (dates, sizes, days), activity.js (change log texts), image.js, user.js, sitePages.js
   theme.js      colours and MUI theme
 ```
 

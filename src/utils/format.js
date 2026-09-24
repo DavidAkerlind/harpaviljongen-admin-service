@@ -67,3 +67,53 @@ export const formatRelative = (value, now = new Date()) => {
 	}
 	return formatDateTime(date);
 };
+
+export const formatTime = (value) => {
+	const date = new Date(value);
+	return Number.isNaN(date.getTime()) ? '' : timeFormat.format(date);
+};
+
+// Dates in the browser's own time zone, as "YYYY-MM-DD" for <input type="date">
+const pad = (n) => String(n).padStart(2, '0');
+export const toDayString = (date) =>
+	`${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+export const parseDay = (value) => {
+	const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value ?? '');
+	return match ? new Date(+match[1], +match[2] - 1, +match[3]) : null;
+};
+export const startOfDay = (date = new Date()) => {
+	const copy = new Date(date);
+	copy.setHours(0, 0, 0, 0);
+	return copy;
+};
+export const addDays = (date, days) => {
+	const copy = new Date(date);
+	copy.setDate(copy.getDate() + days);
+	return copy;
+};
+
+const weekdayFormat = new Intl.DateTimeFormat('sv-SE', {
+	weekday: 'long',
+	day: 'numeric',
+	month: 'long',
+});
+const weekdayYearFormat = new Intl.DateTimeFormat('sv-SE', {
+	weekday: 'long',
+	day: 'numeric',
+	month: 'long',
+	year: 'numeric',
+});
+
+// Heading for a day in a list: "Idag", "Igår", "Tisdag 22 september"
+export const formatDayHeading = (date, now = new Date()) => {
+	const day = startOfDay(date);
+	const today = startOfDay(now);
+	if (day.getTime() === today.getTime()) return 'Idag';
+	if (day.getTime() === addDays(today, -1).getTime()) return 'Igår';
+	const text = (
+		day.getFullYear() === today.getFullYear()
+			? weekdayFormat
+			: weekdayYearFormat
+	).format(day);
+	return text[0].toUpperCase() + text.slice(1);
+};

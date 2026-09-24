@@ -44,6 +44,11 @@ const SWEDISH_STATUS_MESSAGES = {
 // API messages (English) that staff can run into, in Swedish
 const SWEDISH_API_MESSAGES = {
 	'Current password is incorrect': 'Nuvarande lösenord stämmer inte.',
+	'The file is not a JPG, PNG or WebP image':
+		'Bilden måste vara en JPG, PNG eller WebP.',
+	'Only JPG, PNG or WebP images are allowed':
+		'Bilden måste vara en JPG, PNG eller WebP.',
+	'The image is too large (max 5 MB)': 'Bilden är för stor (max 5 MB).',
 };
 
 export const client = axios.create({ baseURL: API_URL, timeout: 60000 });
@@ -65,8 +70,8 @@ client.interceptors.response.use(
 		}
 		const apiMessage = error.response?.data?.message;
 		const message =
-			SWEDISH_STATUS_MESSAGES[status] ||
 			SWEDISH_API_MESSAGES[apiMessage] ||
+			SWEDISH_STATUS_MESSAGES[status] ||
 			apiMessage ||
 			(error.code === 'ECONNABORTED'
 				? 'Servern svarade inte i tid. Försök igen.'

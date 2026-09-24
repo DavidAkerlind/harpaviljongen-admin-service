@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
 	Alert,
-	Avatar,
 	Box,
 	Button,
 	Card,
@@ -30,8 +29,9 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useNotify } from '../components/Notifications';
 import { CreateUserDialog } from '../components/users/CreateUserDialog';
 import { PasswordDialog } from '../components/PasswordDialog';
+import { UserAvatar } from '../components/UserAvatar';
+import { displayName } from '../utils/user';
 import { formatDate } from '../utils/format';
-import { brand } from '../theme';
 
 export function UsersPage() {
 	const notify = useNotify();
@@ -133,17 +133,11 @@ export function UsersPage() {
 												px: { xs: 2, sm: 2.5 },
 												py: 1.75,
 											}}>
-											<Avatar
-												sx={{
-													bgcolor:
-														user.role === 'admin'
-															? brand.green
-															: brand.sageLight,
-													color: user.role === 'admin' ? '#fff' : brand.green,
-													fontWeight: 600,
-												}}>
-												{user.username[0]?.toUpperCase()}
-											</Avatar>
+											<UserAvatar
+												user={user}
+												size={40}
+												tone={user.role === 'admin' ? 'green' : 'light'}
+											/>
 											<Box sx={{ flex: 1, minWidth: 0 }}>
 												<Box
 													sx={{
@@ -152,7 +146,7 @@ export function UsersPage() {
 														gap: 1,
 													}}>
 													<Typography sx={{ fontWeight: 600 }} noWrap>
-														{user.username}
+														{displayName(user)}
 													</Typography>
 													{isMe && (
 														<Chip
@@ -175,14 +169,19 @@ export function UsersPage() {
 														role={user.role}
 														sx={{ display: { sm: 'none' } }}
 													/>
-													{user.createdAt && (
-														<Typography
-															variant="body2"
-															color="text.secondary"
-															noWrap>
-															Tillagd {formatDate(user.createdAt)}
-														</Typography>
-													)}
+													<Typography
+														variant="body2"
+														color="text.secondary"
+														noWrap>
+														{/* The login name, when a display name is shown above */}
+														{[
+															user.name && user.username,
+															user.createdAt &&
+																`Tillagd ${formatDate(user.createdAt)}`,
+														]
+															.filter(Boolean)
+															.join(' · ')}
+													</Typography>
 												</Box>
 											</Box>
 											<RoleChip

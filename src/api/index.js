@@ -23,6 +23,20 @@ export const api = {
 	login: (username, password) =>
 		client.post('/auth/login', { username, password }).then((r) => r.data),
 	me: () => client.get('/auth/me').then((r) => r.data),
+	// Send only what changes: { username?, name? }. Returns { user }
+	updateMe: (fields) => client.patch('/auth/me', fields).then((r) => r.data),
+	uploadAvatar: (blob, onProgress) => {
+		const form = new FormData();
+		form.append('file', blob, 'avatar.jpg');
+		return client
+			.put('/auth/avatar', form, {
+				timeout: 60000,
+				onUploadProgress: (e) =>
+					e.total && onProgress?.(Math.round((e.loaded / e.total) * 100)),
+			})
+			.then((r) => r.data);
+	},
+	deleteAvatar: () => client.delete('/auth/avatar').then((r) => r.data),
 	// Returns { token, user }; the old token stops working
 	changePassword: (currentPassword, newPassword) =>
 		client
@@ -64,9 +78,15 @@ export const api = {
 		client.patch(`/menu-pdfs/${id}`, { title }).then((r) => r.data),
 	deletePdf: (id) => client.delete(`/menu-pdfs/${id}`).then((r) => r.data),
 
-	// Senaste ändringar
-	getActivity: (limit = 8) =>
-		client.get('/activity', { params: { limit } }).then((r) => r.data ?? []),
+	// Ändringar. params: { limit, from, to (ISO, to exclusive), category, userId, before }
+	// Returns { items, total, hasMore }
+	getActivity: (params) =>
+		client.get('/activity', { params }).then((r) => r.data),
+	getActivityUsers: () =>
+		client.get('/activity/users').then((r) => r.data ?? []),
+	// Admins only. olderThan: '30d' | '3m' | '6m' | '1y' | 'all'. Returns { deleted }
+	clearActivity: (olderThan) =>
+		client.delete('/activity', { params: { olderThan } }).then((r) => r.data),
 
 	// Användare (bara admin)
 	getUsers: () => client.get('/users').then((r) => r.data ?? []),

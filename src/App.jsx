@@ -21,6 +21,8 @@ import { MenusPage } from './pages/MenusPage';
 import { OpeningHoursPage } from './pages/OpeningHoursPage';
 import { PagesPage } from './pages/PagesPage';
 import { UsersPage } from './pages/UsersPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { ActivityPage } from './pages/ActivityPage';
 
 function RequireAuth({ children }) {
 	const { status } = useAuth();
@@ -67,6 +69,8 @@ export default function App() {
 								<Route path="menyer/:list" element={<MenusPage />} />
 								<Route path="oppettider" element={<OpeningHoursPage />} />
 								<Route path="sidor" element={<PagesPage />} />
+								<Route path="profil" element={<ProfilePage />} />
+								<Route path="andringar" element={<ActivityPage />} />
 								<Route
 									path="anvandare"
 									element={
