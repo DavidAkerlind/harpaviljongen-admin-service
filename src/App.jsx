@@ -23,6 +23,7 @@ import { PagesPage } from './pages/PagesPage';
 import { UsersPage } from './pages/UsersPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ActivityPage } from './pages/ActivityPage';
+import { StatisticsPage } from './pages/StatisticsPage';
 
 function RequireAuth({ children }) {
 	const { status } = useAuth();
@@ -39,6 +40,12 @@ function RequireAuth({ children }) {
 		return <Navigate to="/login" replace state={{ from: location.pathname }} />;
 	}
 	return children;
+}
+
+// Old address -> new, keeping ?filters
+function Moved({ to }) {
+	const { search } = useLocation();
+	return <Navigate to={to + search} replace />;
 }
 
 function RequireAdmin({ children }) {
@@ -64,13 +71,15 @@ export default function App() {
 								<Route index element={<OverviewPage />} />
 								<Route
 									path="menyer"
-									element={<Navigate to="/menyer/meny" replace />}
+									element={<Navigate to="/menyer/food" replace />}
 								/>
 								<Route path="menyer/:list" element={<MenusPage />} />
 								<Route path="oppettider" element={<OpeningHoursPage />} />
 								<Route path="sidor" element={<PagesPage />} />
 								<Route path="profil" element={<ProfilePage />} />
-								<Route path="andringar" element={<ActivityPage />} />
+								<Route path="statistik" element={<StatisticsPage />} />
+								<Route path="logg" element={<ActivityPage />} />
+								<Route path="andringar" element={<Moved to="/logg" />} />
 								<Route
 									path="anvandare"
 									element={

@@ -49,6 +49,10 @@ const SWEDISH_API_MESSAGES = {
 	'Only JPG, PNG or WebP images are allowed':
 		'Bilden måste vara en JPG, PNG eller WebP.',
 	'The image is too large (max 5 MB)': 'Bilden är för stor (max 5 MB).',
+	'A menu with that name already exists': 'Det finns redan en meny med det namnet.',
+	'Menu not found': 'Menyn finns inte längre. Ladda om sidan.',
+	'There can be at most 20 menus': 'Det kan finnas högst 20 menyer.',
+	'Meny and Vinlista can not be deleted': 'Meny och Vinlista kan inte tas bort.',
 };
 
 export const client = axios.create({ baseURL: API_URL, timeout: 60000 });

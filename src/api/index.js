@@ -12,11 +12,16 @@ export const ROLES = {
 	},
 };
 
-// PDF-typerna i API:t: food = Meny, wine = Vinlista
-export const PDF_LISTS = {
-	meny: { type: 'food', label: 'Meny', noun: 'menyn' },
-	vinlista: { type: 'wine', label: 'Vinlista', noun: 'vinlistan' },
-};
+// Menus (Meny, Vinlista and any created in the admin) come from GET /menu-lists,
+// see src/menus/MenuListsContext.jsx. Old links /menyer/meny and /menyer/vinlista still work.
+export const LEGACY_MENU_PATHS = { meny: 'food', vinlista: 'wine' };
+
+// Statistik: the periods the API can show
+export const ANALYTICS_RANGES = [
+	{ value: '7d', label: '7 dagar' },
+	{ value: '30d', label: '30 dagar' },
+	{ value: '90d', label: '90 dagar' },
+];
 
 export const api = {
 	// Auth
@@ -53,7 +58,22 @@ export const api = {
 	updateSiteSettings: (pages) =>
 		client.put('/site-settings', { pages }).then((r) => r.data),
 
-	// Meny- och vinlista-PDF:er
+	// Min översikt: [{ id, size }], or null for the standard layout. Returns { user }
+	saveDashboard: (widgets) =>
+		client.put('/auth/dashboard', { widgets }).then((r) => r.data),
+
+	// Menyer: [{ type, label, navbar, home, builtIn }]
+	getMenuLists: () => client.get('/menu-lists').then((r) => r.data ?? []),
+	createMenuList: ({ label, navbar, home }) =>
+		client.post('/menu-lists', { label, navbar, home }).then((r) => r.data),
+	// fields: { label?, navbar?, home? }
+	updateMenuList: (type, fields) =>
+		client.patch(`/menu-lists/${type}`, fields).then((r) => r.data),
+	// Also deletes all its PDFs
+	deleteMenuList: (type) =>
+		client.delete(`/menu-lists/${type}`).then((r) => r.data),
+
+	// Menyernas PDF:er
 	getPdfs: (type) =>
 		client.get('/menu-pdfs', { params: { type } }).then((r) => r.data ?? []),
 	uploadPdf: ({ file, type, title, activate }, onProgress) => {
@@ -87,6 +107,10 @@ export const api = {
 	// Admins only. olderThan: '30d' | '3m' | '6m' | '1y' | 'all'. Returns { deleted }
 	clearActivity: (olderThan) =>
 		client.delete('/activity', { params: { olderThan } }).then((r) => r.data),
+
+	// Statistik, range: '7d' | '30d' | '90d'. Our own numbers and Cloudflare's side by side
+	getAnalytics: (range) =>
+		client.get('/analytics', { params: { range } }).then((r) => r.data),
 
 	// Användare (bara admin)
 	getUsers: () => client.get('/users').then((r) => r.data ?? []),

@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link as RouterLink, Navigate, useParams } from 'react-router-dom';
+import {
+	Link as RouterLink,
+	Navigate,
+	useNavigate,
+	useParams,
+} from 'react-router-dom';
 import {
 	Alert,
 	Box,
@@ -16,14 +21,18 @@ import {
 	useMediaQuery,
 } from '@mui/material';
 import {
+	Add,
 	DeleteOutline,
 	EditOutlined,
 	OpenInNew,
 	Public,
 	PublicOff,
+	TuneOutlined,
 	VisibilityOutlined,
 } from '@mui/icons-material';
-import { api, PDF_LISTS } from '../api';
+import { api, LEGACY_MENU_PATHS } from '../api';
+import { useMenuLists } from '../menus/MenuListsContext';
+import { MenuDialog } from '../components/menus/MenuDialog';
 import { PageHeader } from '../components/PageHeader';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useNotify } from '../components/Notifications';
@@ -38,38 +47,100 @@ import { brand } from '../theme';
 const FALLBACK_NAME = '“Ny meny kommer snart”';
 
 export function MenusPage() {
-	const { list: listKey } = useParams();
-	const list = PDF_LISTS[listKey];
-	if (!list) return <Navigate to="/menyer/meny" replace />;
+	const { list: type } = useParams();
+	const { lists, error, reload } = useMenuLists();
+	const navigate = useNavigate();
+	const notify = useNotify();
+	// key remounts the dialog on every open, so it starts empty
+	const [creating, setCreating] = useState({ open: false, key: 0 });
+
+	if (LEGACY_MENU_PATHS[type]) {
+		return <Navigate to={`/menyer/${LEGACY_MENU_PATHS[type]}`} replace />;
+	}
+	const list = lists?.find((l) => l.type === type);
+	if (lists && !list) return <Navigate to="/menyer/food" replace />;
 
 	return (
 		<>
 			<PageHeader
 				title="Menyer"
-				description="Ladda upp menyn och vinlistan som PDF. Den som är aktiv öppnas när gästerna klickar på knapparna på hemsidan."
+				description="Ladda upp menyerna som PDF. Den som är aktiv öppnas när gästerna klickar på menyns knapp på hemsidan."
+				actions={
+					<Button
+						variant="contained"
+						startIcon={<Add />}
+						onClick={() =>
+							setCreating((prev) => ({ open: true, key: prev.key + 1 }))
+						}>
+						Ny meny
+					</Button>
+				}
 			/>
-			<Tabs
-				value={listKey}
-				sx={{ mb: 3, borderBottom: `1px solid ${brand.border}` }}
-				aria-label="Välj lista">
-				{Object.entries(PDF_LISTS).map(([key, item]) => (
-					<Tab
-						key={key}
-						value={key}
-						label={item.label}
-						component={RouterLink}
-						to={`/menyer/${key}`}
-					/>
-				))}
-			</Tabs>
-			{/* key: start fresh when switching between Meny and Vinlista */}
-			<PdfManager key={listKey} list={list} />
+			{error ? (
+				<Alert
+					severity="error"
+					action={
+						<Button color="inherit" size="small" onClick={reload}>
+							Försök igen
+						</Button>
+					}>
+					Kunde inte hämta menyerna. {error}
+				</Alert>
+			) : !lists ? (
+				<Skeleton variant="rounded" height={48} sx={{ mb: 3 }} />
+			) : (
+				<>
+					<Tabs
+						value={type}
+						variant="scrollable"
+						scrollButtons="auto"
+						allowScrollButtonsMobile
+						sx={{ mb: 3, borderBottom: `1px solid ${brand.border}` }}
+						aria-label="Välj meny">
+						{lists.map((item) => (
+							<Tab
+								key={item.type}
+								value={item.type}
+								label={item.label}
+								component={RouterLink}
+								to={`/menyer/${item.type}`}
+							/>
+						))}
+					</Tabs>
+					{/* key: start fresh when switching between menus */}
+					<PdfManager key={type} list={list} />
+				</>
+			)}
+
+			<MenuDialog
+				key={creating.key}
+				open={creating.open}
+				menu={null}
+				onClose={() => setCreating((prev) => ({ ...prev, open: false }))}
+				onSaved={async (menu) => {
+					setCreating((prev) => ({ ...prev, open: false }));
+					await reload();
+					notify(`Menyn “${menu.label}” är skapad. Ladda upp en PDF till den.`);
+					navigate(`/menyer/${menu.type}`);
+				}}
+			/>
 		</>
 	);
 }
 
+// "Knapp i menyn och på startsidan" – where the website shows the menu's button
+function buttonPlacesText({ navbar, home }) {
+	if (navbar && home) return 'Knapp i menyn och på startsidan';
+	if (navbar) return 'Knapp i menyn på hemsidan';
+	if (home) return 'Knapp på startsidan';
+	return 'Ingen knapp på hemsidan';
+}
+
 function PdfManager({ list }) {
 	const notify = useNotify();
+	const navigate = useNavigate();
+	const { reload: reloadLists } = useMenuLists();
+	const [settings, setSettings] = useState({ open: false, key: 0 });
 	const isPhone = useMediaQuery((theme) => theme.breakpoints.down('sm'));
 	const [pdfs, setPdfs] = useState(null);
 	const [error, setError] = useState(null);
@@ -99,6 +170,10 @@ function PdfManager({ list }) {
 
 	const active = pdfs?.find((pdf) => pdf.isActive);
 	const name = (pdf) => `“${pdf.title || pdf.originalName}”`;
+	// What the website does when this menu has no active PDF
+	const withoutActiveText = list.builtIn
+		? `Knappen “${list.label}” på hemsidan öppnar då reservfilen ${FALLBACK_NAME} tills du väljer en annan PDF.`
+		: `Knappen “${list.label}” visas då inte på hemsidan förrän du väljer en annan PDF.`;
 
 	const run = async (action, successMessage) => {
 		setBusy(true);
@@ -124,6 +199,20 @@ function PdfManager({ list }) {
 
 	const confirmAction = async () => {
 		const { kind, pdf } = confirm;
+		if (kind === 'deleteMenu') {
+			setBusy(true);
+			try {
+				await api.deleteMenuList(list.type);
+				setConfirm(null);
+				notify(`Menyn “${list.label}” är borttagen`);
+				await reloadLists();
+				navigate('/menyer/food', { replace: true });
+			} catch (err) {
+				notify(err.message, 'error');
+				setBusy(false);
+			}
+			return;
+		}
 		if (kind === 'delete') {
 			await run(() => api.deletePdf(pdf._id), `${name(pdf)} är borttagen`);
 		} else {
@@ -151,6 +240,28 @@ function PdfManager({ list }) {
 
 	return (
 		<Box sx={{ display: 'grid', gap: 4 }}>
+			<Box
+				sx={{
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'space-between',
+					gap: 1,
+					mt: -1.5,
+				}}>
+				<Typography variant="body2" color="text.secondary">
+					{buttonPlacesText(list)}
+				</Typography>
+				<Button
+					size="small"
+					color="inherit"
+					startIcon={<TuneOutlined />}
+					onClick={() =>
+						setSettings((prev) => ({ open: true, key: prev.key + 1 }))
+					}>
+					Inställningar
+				</Button>
+			</Box>
+
 			{/* Aktiv just nu */}
 			<Box>
 				<Typography variant="h2" sx={{ mb: 1.5 }}>
@@ -240,9 +351,18 @@ function PdfManager({ list }) {
 						severity="warning"
 						variant="outlined"
 						sx={{ bgcolor: 'background.paper' }}>
-						Ingen {list.label.toLowerCase()} är aktiv. Knappen “{list.label}” på
-						hemsidan öppnar reservfilen {FALLBACK_NAME} tills du väljer en PDF
-						nedan eller laddar upp en ny.
+						{list.builtIn ? (
+							<>
+								Ingen {list.label.toLowerCase()} är aktiv. Knappen “{list.label}”
+								på hemsidan öppnar reservfilen {FALLBACK_NAME} tills du väljer en
+								PDF nedan eller laddar upp en ny.
+							</>
+						) : (
+							<>
+								Ingen PDF är aktiv, så knappen “{list.label}” visas inte på
+								hemsidan. Välj en PDF nedan eller ladda upp en ny.
+							</>
+						)}
 					</Alert>
 				)}
 			</Box>
@@ -254,7 +374,7 @@ function PdfManager({ list }) {
 				</Typography>
 				<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
 					{pdfs?.length === 0
-						? `Inga PDF:er uppladdade än. Ladda upp ${list.noun} för att komma igång.`
+						? 'Inga PDF:er uppladdade än. Ladda upp en för att komma igång.'
 						: 'Klicka på en PDF för att förhandsgranska den. Bara en i taget kan visas på hemsidan.'}
 				</Typography>
 
@@ -401,6 +521,22 @@ function PdfManager({ list }) {
 				}}
 			/>
 
+			<MenuDialog
+				key={`settings-${settings.key}`}
+				open={settings.open}
+				menu={list}
+				onClose={() => setSettings((prev) => ({ ...prev, open: false }))}
+				onSaved={async (menu) => {
+					setSettings((prev) => ({ ...prev, open: false }));
+					await reloadLists();
+					notify(`Menyn “${menu.label}” är sparad`);
+				}}
+				onDelete={() => {
+					setSettings((prev) => ({ ...prev, open: false }));
+					setConfirm({ kind: 'deleteMenu' });
+				}}
+			/>
+
 			<PdfPreviewDialog
 				pdf={preview}
 				busy={busy}
@@ -411,30 +547,44 @@ function PdfManager({ list }) {
 			<ConfirmDialog
 				open={Boolean(confirm)}
 				busy={busy}
-				danger={confirm?.kind === 'delete'}
+				danger={confirm?.kind === 'delete' || confirm?.kind === 'deleteMenu'}
 				title={
-					confirm?.kind === 'delete'
-						? 'Ta bort PDF?'
-						: 'Sluta visa på hemsidan?'
+					confirm?.kind === 'deleteMenu'
+						? `Ta bort menyn ${list.label}?`
+						: confirm?.kind === 'delete'
+							? 'Ta bort PDF?'
+							: 'Sluta visa på hemsidan?'
 				}
-				confirmText={confirm?.kind === 'delete' ? 'Ta bort' : 'Sluta visa'}
+				confirmText={
+					confirm?.kind === 'deleteMenu'
+						? 'Ta bort menyn'
+						: confirm?.kind === 'delete'
+							? 'Ta bort'
+							: 'Sluta visa'
+				}
 				onConfirm={confirmAction}
 				onClose={() => setConfirm(null)}>
+				{confirm?.kind === 'deleteMenu' && (
+					<>
+						{`Knappen “${list.label}” försvinner från hemsidan${
+							pdfs?.length
+								? ` och ${pdfs.length === 1 ? 'menyns PDF' : `alla ${pdfs.length} PDF:er`} raderas permanent`
+								: ''
+						}. Det går inte att ångra.`}
+					</>
+				)}
 				{confirm?.kind === 'delete' && !confirm.pdf.isActive && (
 					<>{name(confirm.pdf)} raderas permanent.</>
 				)}
 				{confirm?.kind === 'delete' && confirm.pdf.isActive && (
 					<>
-						{name(confirm.pdf)} visas just nu på hemsidan och raderas permanent.
-						Knappen “{list.label}” öppnar då reservfilen {FALLBACK_NAME} tills
-						du väljer en annan PDF.
+						{name(confirm.pdf)} visas just nu på hemsidan och raderas permanent.{' '}
+						{withoutActiveText}
 					</>
 				)}
 				{confirm?.kind === 'deactivate' && (
 					<>
-						Knappen “{list.label}” på hemsidan öppnar då reservfilen{' '}
-						{FALLBACK_NAME} tills du väljer en annan PDF. {name(confirm.pdf)}{' '}
-						finns kvar här.
+						{withoutActiveText} {name(confirm.pdf)} finns kvar här.
 					</>
 				)}
 			</ConfirmDialog>

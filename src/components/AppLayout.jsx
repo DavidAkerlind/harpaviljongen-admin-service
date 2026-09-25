@@ -30,6 +30,9 @@ import {
 	KeyOutlined,
 	UnfoldMore,
 	AccountCircleOutlined,
+	InsightsOutlined,
+	HistoryOutlined,
+	MoreHoriz,
 } from '@mui/icons-material';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../api';
@@ -38,41 +41,60 @@ import { useNotify } from './Notifications';
 import { PasswordDialog } from './PasswordDialog';
 import { UserAvatar } from './UserAvatar';
 import { displayName } from '../utils/user';
+import { MenuListsProvider } from '../menus/MenuListsContext';
 import { brand } from '../theme';
 import hareLogo from '../assets/hare-logo-white.svg';
 
 const DRAWER_WIDTH = 248;
 
-const NAV_ITEMS = [
-	{
-		label: 'Översikt',
-		to: '/',
-		// Alla ändringar is opened from Översikt
-		also: '/andringar',
-		icon: <SpaceDashboardOutlined />,
-	},
+const OVERVIEW_ITEM = {
+	label: 'Översikt',
+	to: '/',
+	icon: <SpaceDashboardOutlined />,
+};
+const STATS_ITEM = {
+	label: 'Statistik',
+	to: '/statistik',
+	icon: <InsightsOutlined />,
+};
+const CONTENT_ITEMS = [
 	{
 		label: 'Menyer',
-		to: '/menyer/meny',
+		to: '/menyer/food',
 		match: '/menyer',
 		icon: <MenuBookOutlined />,
 	},
 	{ label: 'Öppettider', to: '/oppettider', icon: <ScheduleOutlined /> },
 	{ label: 'Sidor', to: '/sidor', icon: <WebOutlined /> },
 ];
-
-// Only for admins: in the sidebar on desktop, in the account menu on phones
+const LOG_ITEM = { label: 'Logg', to: '/logg', icon: <HistoryOutlined /> };
+// Only for admins
 const USERS_ITEM = {
 	label: 'Användare',
 	to: '/anvandare',
 	icon: <PeopleOutline />,
 };
 
+// Sidebar on desktop
+const sidebarItems = (isAdmin) => [
+	OVERVIEW_ITEM,
+	STATS_ITEM,
+	...CONTENT_ITEMS,
+	LOG_ITEM,
+	...(isAdmin ? [USERS_ITEM] : []),
+];
+// Bottom bar on phones: the everyday pages, the rest behind "Mer"
+const BOTTOM_ITEMS = [OVERVIEW_ITEM, ...CONTENT_ITEMS];
+const moreItems = (isAdmin) => [
+	STATS_ITEM,
+	LOG_ITEM,
+	...(isAdmin ? [USERS_ITEM] : []),
+];
+
 const isActive = (item, pathname) =>
-	(item.to === '/'
+	item.to === '/'
 		? pathname === '/'
-		: pathname.startsWith(item.match ?? item.to)) ||
-	(item.also && pathname.startsWith(item.also));
+		: pathname.startsWith(item.match ?? item.to);
 
 function Brand() {
 	return (
@@ -103,7 +125,7 @@ function Brand() {
 function Sidebar() {
 	const { pathname } = useLocation();
 	const { user, isAdmin } = useAuth();
-	const items = isAdmin ? [...NAV_ITEMS, USERS_ITEM] : NAV_ITEMS;
+	const items = sidebarItems(isAdmin);
 
 	return (
 		<Box
@@ -191,8 +213,8 @@ function Sidebar() {
 }
 
 // placement 'above': opens upwards from the sidebar footer, which already shows the name
-function AccountMenu({ trigger, placement = 'below', showUsersLink = false }) {
-	const { user, isAdmin, logout, changePassword } = useAuth();
+function AccountMenu({ trigger, placement = 'below' }) {
+	const { user, logout, changePassword } = useAuth();
 	const notify = useNotify();
 	const [anchor, setAnchor] = useState(null);
 	const [passwordOpen, setPasswordOpen] = useState(false);
@@ -230,12 +252,6 @@ function AccountMenu({ trigger, placement = 'below', showUsersLink = false }) {
 					</Box>
 				)}
 				{!above && <Divider />}
-				{showUsersLink && isAdmin && (
-					<MenuItem component={NavLink} to={USERS_ITEM.to} onClick={close}>
-						<ListItemIcon>{USERS_ITEM.icon}</ListItemIcon>
-						{USERS_ITEM.label}
-					</MenuItem>
-				)}
 				<MenuItem component={NavLink} to="/profil" onClick={close}>
 					<ListItemIcon>
 						<AccountCircleOutlined />
@@ -283,8 +299,11 @@ function AccountMenu({ trigger, placement = 'below', showUsersLink = false }) {
 
 function MobileBars() {
 	const { pathname } = useLocation();
-	const { user } = useAuth();
-	const current = NAV_ITEMS.findIndex((item) => isActive(item, pathname));
+	const { user, isAdmin } = useAuth();
+	const [moreAnchor, setMoreAnchor] = useState(null);
+	const more = moreItems(isAdmin);
+	const current = BOTTOM_ITEMS.findIndex((item) => isActive(item, pathname));
+	const moreActive = more.some((item) => isActive(item, pathname));
 
 	return (
 		<>
@@ -305,7 +324,6 @@ function MobileBars() {
 						<OpenInNew />
 					</IconButton>
 					<AccountMenu
-						showUsersLink
 						trigger={(open) => (
 							<IconButton
 								onClick={open}
@@ -330,18 +348,48 @@ function MobileBars() {
 					borderTop: `1px solid ${brand.border}`,
 					pb: 'env(safe-area-inset-bottom)',
 				}}>
-				<BottomNavigation showLabels value={current}>
-					{NAV_ITEMS.map((item) => (
+				<BottomNavigation
+					showLabels
+					value={moreActive ? 'more' : current}
+					sx={{ '& .MuiBottomNavigationAction-root': { minWidth: 0, px: 0.5 } }}>
+					{BOTTOM_ITEMS.map((item, index) => (
 						<BottomNavigationAction
 							key={item.to}
+							value={index}
 							label={item.label}
 							icon={item.icon}
 							component={NavLink}
 							to={item.to}
 						/>
 					))}
+					<BottomNavigationAction
+						value="more"
+						label="Mer"
+						icon={<MoreHoriz />}
+						aria-haspopup="menu"
+						onClick={(e) => setMoreAnchor(e.currentTarget)}
+					/>
 				</BottomNavigation>
 			</Paper>
+			<Menu
+				anchorEl={moreAnchor}
+				open={Boolean(moreAnchor)}
+				onClose={() => setMoreAnchor(null)}
+				anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+				transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+				slotProps={{ paper: { sx: { minWidth: 200, mt: -1 } } }}>
+				{more.map((item) => (
+					<MenuItem
+						key={item.to}
+						component={NavLink}
+						to={item.to}
+						selected={isActive(item, pathname)}
+						onClick={() => setMoreAnchor(null)}>
+						<ListItemIcon>{item.icon}</ListItemIcon>
+						{item.label}
+					</MenuItem>
+				))}
+			</Menu>
 		</>
 	);
 }
@@ -360,7 +408,9 @@ export function AppLayout() {
 					pb: { xs: 'calc(96px + env(safe-area-inset-bottom))', md: 6 },
 				}}>
 				<Box sx={{ maxWidth: 1080, mx: 'auto' }}>
-					<Outlet />
+					<MenuListsProvider>
+						<Outlet />
+					</MenuListsProvider>
 				</Box>
 			</Box>
 		</Box>
