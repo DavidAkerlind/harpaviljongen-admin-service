@@ -28,7 +28,9 @@ import {
 	BREAKDOWNS,
 	METRICS,
 	activeSources,
+	availableBreakdowns,
 	breakdownRows,
+	breakdownSources,
 	changePercent,
 	formatLongDay,
 	formatNumber,
@@ -45,7 +47,7 @@ export function StatisticsPage() {
 		<>
 			<PageHeader
 				title="Statistik"
-				description="Besök på harpaviljongen.com. Vi räknar själva utan cookies och visar Cloudflare Web Analytics bredvid."
+				description="Besök på harpaviljongen.com. Vi räknar själva utan cookies och visar Cloudflares siffror bredvid."
 				actions={
 					<ToggleButtonGroup
 						exclusive
@@ -208,8 +210,11 @@ function TrendCard({ data }) {
 }
 
 function BreakdownCard({ data }) {
-	const [kind, setKind] = useState('pages');
-	const sources = activeSources(data);
+	const [chosen, setKind] = useState('pages');
+	const tabs = availableBreakdowns(data);
+	// Länder is gone when Cloudflare isn't connected
+	const kind = tabs.some((b) => b.value === chosen) ? chosen : 'pages';
+	const sources = breakdownSources(data, kind);
 	const rows = breakdownRows(data, kind);
 	const unit = BREAKDOWNS.find((b) => b.value === kind).unit;
 
@@ -221,11 +226,12 @@ function BreakdownCard({ data }) {
 					onChange={(e, value) => setKind(value)}
 					sx={{ mb: 1.5, minHeight: 40, '& .MuiTab-root': { minHeight: 40, px: 1.5, minWidth: 0 } }}
 					aria-label="Visa mest besökta">
-					{BREAKDOWNS.map((b) => (
+					{tabs.map((b) => (
 						<Tab key={b.value} value={b.value} label={b.label} />
 					))}
 				</Tabs>
-				{sources.length > 1 && (
+				{/* Also when only one of the two counts this tab, so it's clear which one */}
+				{activeSources(data).length > 1 && sources.length > 0 && (
 					<Box sx={{ mb: 1.5 }}>
 						<Legend series={sources} shape="rect" />
 					</Box>
@@ -244,17 +250,35 @@ function SourcesNote({ data }) {
 	const { isAdmin } = useAuth();
 	const { own, cloudflare } = data.sources;
 	return (
-		<Typography variant="body2" color="text.secondary">
-			{own.since
-				? `Egen mätning sedan ${formatDate(own.since)}. `
-				: 'Egen mätning har inte räknat några besök än. '}
-			Besök = sidvisningar som inte kom från en annan sida på hemsidan.{' '}
-			{cloudflare.status === 'off' &&
-				(isAdmin
-					? 'Cloudflare Web Analytics är inte kopplat, se docs/GO_LIVE.md i API:t.'
-					: 'Cloudflare Web Analytics är inte kopplat.')}
-			{cloudflare.status === 'error' &&
-				`Kunde inte hämta från Cloudflare: ${cloudflare.message}`}
-		</Typography>
+		<Box sx={{ display: 'grid', gap: 1 }}>
+			{!own.since && (
+				<Alert severity="info" variant="outlined" sx={{ bgcolor: 'background.paper' }}>
+					Inga sidvisningar räknade än. Öppna harpaviljongen.com och ladda om den här
+					sidan efter en minut. Besök från webbläsare med annonsblockerare räknas
+					inte alltid.
+				</Alert>
+			)}
+			{cloudflare.status === 'off' && isAdmin && (
+				<Alert severity="info" variant="outlined" sx={{ bgcolor: 'background.paper' }}>
+					Cloudflare är inte kopplat. Lägg till{' '}
+					<code>CLOUDFLARE_API_TOKEN</code> och <code>CLOUDFLARE_ACCOUNT_ID</code> under
+					Environment på Render, se docs/GO_LIVE.md i API:t.
+				</Alert>
+			)}
+			{cloudflare.status === 'error' && (
+				<Alert severity="warning" variant="outlined" sx={{ bgcolor: 'background.paper' }}>
+					Kunde inte hämta från Cloudflare: {cloudflare.message}
+				</Alert>
+			)}
+			<Typography variant="body2" color="text.secondary">
+				{own.since && `Egen mätning sedan ${formatDate(own.since)}. `}
+				{cloudflare.since && `Cloudflare sedan ${formatDate(cloudflare.since)}. `}
+				Besök = sidvisningar som inte kom från en annan sida på hemsidan. Robotar räknas
+				inte.
+				{cloudflare.status === 'ok' &&
+					' Cloudflare ser bara när en sida laddas, inte klick vidare på hemsidan, så dess sidvisningar blir färre.'}
+				{cloudflare.status === 'off' && !isAdmin && ' Cloudflare är inte kopplat.'}
+			</Typography>
+		</Box>
 	);
 }
