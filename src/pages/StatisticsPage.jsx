@@ -244,17 +244,31 @@ function SourcesNote({ data }) {
 	const { isAdmin } = useAuth();
 	const { own, cloudflare } = data.sources;
 	return (
-		<Typography variant="body2" color="text.secondary">
-			{own.since
-				? `Egen mätning sedan ${formatDate(own.since)}. `
-				: 'Egen mätning har inte räknat några besök än. '}
-			Besök = sidvisningar som inte kom från en annan sida på hemsidan.{' '}
-			{cloudflare.status === 'off' &&
-				(isAdmin
-					? 'Cloudflare Web Analytics är inte kopplat, se docs/GO_LIVE.md i API:t.'
-					: 'Cloudflare Web Analytics är inte kopplat.')}
-			{cloudflare.status === 'error' &&
-				`Kunde inte hämta från Cloudflare: ${cloudflare.message}`}
-		</Typography>
+		<Box sx={{ display: 'grid', gap: 1 }}>
+			{!own.since && (
+				<Alert severity="info" variant="outlined" sx={{ bgcolor: 'background.paper' }}>
+					Inga sidvisningar räknade än. Öppna harpaviljongen.com och ladda om den här
+					sidan efter en minut. Besök från webbläsare med annonsblockerare räknas
+					inte alltid.
+				</Alert>
+			)}
+			{cloudflare.status === 'off' && isAdmin && (
+				<Alert severity="info" variant="outlined" sx={{ bgcolor: 'background.paper' }}>
+					Cloudflare Web Analytics är inte kopplat. Lägg till{' '}
+					<code>CLOUDFLARE_API_TOKEN</code> och <code>CLOUDFLARE_ACCOUNT_ID</code> under
+					Environment på Render, se docs/GO_LIVE.md i API:t.
+				</Alert>
+			)}
+			{cloudflare.status === 'error' && (
+				<Alert severity="warning" variant="outlined" sx={{ bgcolor: 'background.paper' }}>
+					Kunde inte hämta från Cloudflare: {cloudflare.message}
+				</Alert>
+			)}
+			<Typography variant="body2" color="text.secondary">
+				{own.since && `Egen mätning sedan ${formatDate(own.since)}. `}
+				Besök = sidvisningar som inte kom från en annan sida på hemsidan.
+				{cloudflare.status === 'off' && !isAdmin && ' Cloudflare Web Analytics är inte kopplat.'}
+			</Typography>
+		</Box>
 	);
 }
