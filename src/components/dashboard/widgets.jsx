@@ -12,7 +12,7 @@ import { BarList } from '../charts/BarList';
 import { StatTile } from '../charts/StatTile';
 import {
 	METRICS,
-	activeSources,
+	breakdownSources,
 	breakdownRows,
 	changePercent,
 	trendSeries,
@@ -161,7 +161,7 @@ export function TopPagesWidget({ size, reloadKey }) {
 			<Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
 				Sidvisningar, 7 dagar
 			</Typography>
-			<BarList rows={rows} series={activeSources(data)} unit="sidvisningar" />
+			<BarList rows={rows} series={breakdownSources(data, 'pages')} unit="sidvisningar" />
 		</>
 	) : (
 		<Typography color="text.secondary">Inga besök de senaste 7 dagarna än.</Typography>

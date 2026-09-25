@@ -131,7 +131,8 @@ export const api = {
 	// Cross-origin, so the response can't be read; a resolved fetch means the site answered
 	checkWebsite: async () => {
 		const start = performance.now();
-		await fetch(SITE_URL, { mode: 'no-cors', cache: 'no-store' });
+		// A small file, not a page: Cloudflare would count loading the start page as a visit
+		await fetch(`${SITE_URL}/robots.txt`, { mode: 'no-cors', cache: 'no-store' });
 		return { latency: Math.round(performance.now() - start) };
 	},
 };

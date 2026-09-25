@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api';
 
 // The two sources on the Statistik page, in fixed order and colors (checked for
-// color blindness): our own counting and Cloudflare Web Analytics.
+// color blindness): our own counting and Cloudflare's traffic data.
 export const SOURCES = [
 	{ key: 'own', label: 'Egen mätning', color: '#1a6e45' },
 	{ key: 'cloudflare', label: 'Cloudflare', color: '#2a78d6' },
@@ -30,6 +30,18 @@ export const pageName = (path) =>
 export const referrerName = (host) =>
 	host === '(direct)' ? 'Direkt eller okänd' : host === '(other)' ? 'Övriga' : host;
 export const deviceName = (type) => DEVICE_NAMES[type] ?? type;
+
+// Cloudflare gives countries as codes: 'SE' -> 'Sverige'. XX = unknown, T1 = Tor.
+const regionNames = new Intl.DisplayNames(['sv'], { type: 'region', fallback: 'code' });
+export const countryName = (code) => {
+	if (code === 'XX') return 'Okänt land';
+	if (code === 'T1') return 'Tor-nätverket';
+	try {
+		return regionNames.of(code);
+	} catch {
+		return code;
+	}
+};
 
 const numberFormat = new Intl.NumberFormat('sv-SE');
 export const formatNumber = (n) => numberFormat.format(Math.round(n ?? 0));
@@ -92,27 +104,44 @@ export function useAnalytics(range, reloadKey = 0) {
 	return state;
 }
 
-// The "Mest besökta" tabs: pages and devices by page views, referrers by visits
+// The "Mest besökta" tabs: pages, devices and countries by page views, referrers by
+// visits. Where visitors came from is only our own counting, countries only Cloudflare.
 export const BREAKDOWNS = [
 	{ value: 'pages', label: 'Sidor', name: pageName, unit: 'sidvisningar' },
 	{ value: 'referrers', label: 'Källor', name: referrerName, unit: 'besök' },
 	{ value: 'devices', label: 'Enheter', name: deviceName, unit: 'sidvisningar' },
+	{ value: 'countries', label: 'Länder', name: countryName, unit: 'sidvisningar' },
 ];
 
 // The sources that have numbers for this period (Cloudflare only when it's connected)
 export const activeSources = (data) =>
 	SOURCES.filter((s) => s.key === 'own' || data?.totals.cloudflare);
 
-// Values per day for <TrendChart>. Our own counting has no numbers from before it
-// started, so those days are null (not drawn) instead of 0.
+// What each source counts (the API sends null for the rest): Cloudflare's free plan doesn't
+// tell where visitors came from, and our own counting doesn't know countries
+const COUNTS = {
+	own: ['pages', 'referrers', 'devices'],
+	cloudflare: ['pages', 'devices', 'countries'],
+};
+export const breakdownSources = (data, kind) =>
+	activeSources(data).filter((s) => COUNTS[s.key].includes(kind));
+
+// The tabs that have a source this period (no countries without Cloudflare)
+export const availableBreakdowns = (data) =>
+	BREAKDOWNS.filter((b) => data.breakdown[b.value] && breakdownSources(data, b.value).length);
+
+// Values per day for <TrendChart>. Days a source has no numbers for (before our own
+// counting started, or older than Cloudflare keeps) are null (not drawn) instead of 0.
 export const trendSeries = (data, metric) =>
 	activeSources(data).map((s) => ({
 		...s,
-		values: data.series.map((day) =>
-			s.key === 'own' && (!data.sources.own.since || day.date < data.sources.own.since)
-				? null
-				: (day[s.key]?.[metric] ?? 0)
-		),
+		values: data.series.map((day) => {
+			if (s.key === 'own') {
+				const since = data.sources.own.since;
+				return !since || day.date < since ? null : day.own[metric];
+			}
+			return day.cloudflare ? day.cloudflare[metric] : null;
+		}),
 	}));
 
 // Rows for <BarList>, the biggest first
