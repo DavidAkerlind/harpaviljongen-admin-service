@@ -3,6 +3,7 @@ import {
 	Alert,
 	Box,
 	Button,
+	ButtonBase,
 	Card,
 	Chip,
 	Divider,
@@ -21,6 +22,7 @@ import {
 	MoreVert,
 	PersonAddAlt1Outlined,
 	PersonOutline,
+	Add,
 } from '@mui/icons-material';
 import { api, ROLES } from '../api';
 import { useAuth } from '../auth/AuthContext';
@@ -32,6 +34,7 @@ import { PasswordDialog } from '../components/PasswordDialog';
 import { UserAvatar } from '../components/UserAvatar';
 import { displayName } from '../utils/user';
 import { formatDate } from '../utils/format';
+import { brand } from '../theme';
 
 export function UsersPage() {
 	const notify = useNotify();
@@ -202,6 +205,12 @@ export function UsersPage() {
 									</Box>
 								);
 							})}
+					{users !== null && (
+						<>
+							<Divider />
+							<NewUserRow onClick={() => setCreateOpen(true)} />
+						</>
+					)}
 				</Card>
 			)}
 
@@ -314,6 +323,47 @@ export function UsersPage() {
 				)}
 			</ConfirmDialog>
 		</>
+	);
+}
+
+// Last row of the list: looks like a user row, click it to add one
+function NewUserRow({ onClick }) {
+	return (
+		<ButtonBase
+			onClick={onClick}
+			sx={{
+				width: '100%',
+				display: 'flex',
+				justifyContent: 'flex-start',
+				gap: 2,
+				px: { xs: 2, sm: 2.5 },
+				py: 1.75,
+				textAlign: 'left',
+				'&:hover, &.Mui-focusVisible': { bgcolor: brand.sageLight },
+				'&:hover .new-user-icon': { borderColor: brand.green },
+			}}>
+			<Box
+				className="new-user-icon"
+				sx={{
+					width: 40,
+					height: 40,
+					flexShrink: 0,
+					borderRadius: '50%',
+					border: `2px dashed ${brand.sage}`,
+					color: brand.green,
+					display: 'grid',
+					placeItems: 'center',
+					transition: 'border-color .15s ease',
+				}}>
+				<Add />
+			</Box>
+			<Box sx={{ minWidth: 0 }}>
+				<Typography sx={{ fontWeight: 600 }}>Lägg till användare</Typography>
+				<Typography variant="body2" color="text.secondary">
+					Som admin eller personal
+				</Typography>
+			</Box>
+		</ButtonBase>
 	);
 }
 

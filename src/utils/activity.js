@@ -36,12 +36,8 @@ export function clearCutoff(value, now = new Date()) {
 
 const changes = (n) => `${n} ${n === 1 ? 'ändring' : 'ändringar'}`;
 
-const LIST_LABELS = {
-	food: 'Meny',
-	wine: 'Vinlista',
-	lunch: 'Lunch',
-	drinks: 'Dryck',
-};
+// For entries saved before the menu's name was stored with them
+const LIST_LABELS = { food: 'Meny', wine: 'Vinlista' };
 const PLACEMENT_TEXT = { navbar: 'i menyn', home: 'på startsidan' };
 
 // ['fredag', 'lördag', 'söndag'] -> "fredag, lördag och söndag"
@@ -54,7 +50,8 @@ const roleText = (role) => (ROLES[role]?.label ?? role ?? '').toLowerCase();
 
 // What someone did, without their name: "laddade upp “Höstmeny” (Meny)"
 export function describeActivity({ type, details = {} }) {
-	const pdf = `“${details.title}” (${LIST_LABELS[details.pdfType] ?? details.pdfType})`;
+	const pdf = `“${details.title}” (${details.menuLabel ?? LIST_LABELS[details.pdfType] ?? details.pdfType})`;
+	const menu = `“${details.label}”`;
 
 	switch (type) {
 		case 'pdf.upload':
@@ -67,6 +64,26 @@ export function describeActivity({ type, details = {} }) {
 			return `döpte om “${details.from}” till ${pdf}`;
 		case 'pdf.delete':
 			return `tog bort ${pdf}`;
+		case 'menu.create':
+			return `skapade menyn ${menu}`;
+		case 'menu.update': {
+			const { label, navbar, home } = details.changes ?? {};
+			const parts = [];
+			if (label) parts.push(`döpte om menyn “${label.from}” till “${label.to}”`);
+			const button = (value, placement) =>
+				`${value ? 'visar' : 'döljer'} knappen för ${menu} ${PLACEMENT_TEXT[placement]}`;
+			if (navbar !== undefined) parts.push(button(navbar, 'navbar'));
+			if (home !== undefined) parts.push(button(home, 'home'));
+			return joinSv(parts) || `ändrade menyn ${menu}`;
+		}
+		case 'menu.delete':
+			return `tog bort menyn ${menu}${
+				details.pdfs === 1
+					? ' och dess PDF'
+					: details.pdfs > 1
+						? ` och dess ${details.pdfs} PDF:er`
+						: ''
+			}`;
 		case 'openingHours.update': {
 			const days = details.days ?? [];
 			return days.length === 7

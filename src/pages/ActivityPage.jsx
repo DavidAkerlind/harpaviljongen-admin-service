@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link as RouterLink, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import {
 	Alert,
 	Box,
@@ -13,7 +13,6 @@ import {
 	Typography,
 } from '@mui/material';
 import {
-	ArrowBack,
 	DeleteSweepOutlined,
 	FilterAltOff,
 } from '@mui/icons-material';
@@ -189,16 +188,8 @@ export function ActivityPage() {
 
 	return (
 		<>
-			<Button
-				component={RouterLink}
-				to="/"
-				startIcon={<ArrowBack />}
-				size="small"
-				sx={{ ml: -1, mb: 1 }}>
-				Översikt
-			</Button>
 			<PageHeader
-				title="Alla ändringar"
+				title="Logg"
 				description={`Vem som ändrat vad i admin: menyer, öppettider, sidor, användare och profiler. Ändringar sparas i ${RETENTION_TEXT}.`}
 				actions={
 					isAdmin && (
