@@ -12,9 +12,11 @@ import { BarList } from '../charts/BarList';
 import { StatTile } from '../charts/StatTile';
 import {
 	METRICS,
-	breakdownSources,
+	barSeries,
 	breakdownRows,
-	changePercent,
+	combinedOf,
+	totalChange,
+	totalOf,
 	trendSeries,
 	useAnalytics,
 } from '../../utils/analytics';
@@ -133,13 +135,12 @@ export function VisitorsWidget({ reloadKey }) {
 			<StatTile
 				compact
 				label={`${METRICS.visits.label}, 7 dagar`}
-				value={data.totals.own.visits}
-				change={changePercent(data.totals.own.visits, data.totals.ownPrevious.visits)}
-				cloudflare={data.totals.cloudflare?.visits}
+				value={totalOf(data, 'visits')}
+				change={totalChange(data, 'visits')}
 			/>
 			<TrendChart
 				compact
-				dates={data.series.map((d) => d.date)}
+				dates={combinedOf(data).series.map((d) => d.date)}
 				series={series}
 				height="fill"
 				label="Besök per dag, 7 dagar"
@@ -161,7 +162,7 @@ export function TopPagesWidget({ size, reloadKey }) {
 			<Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
 				Sidvisningar, 7 dagar
 			</Typography>
-			<BarList rows={rows} series={breakdownSources(data, 'pages')} unit="sidvisningar" />
+			<BarList rows={rows} series={barSeries()} unit="sidvisningar" />
 		</>
 	) : (
 		<Typography color="text.secondary">Inga besök de senaste 7 dagarna än.</Typography>

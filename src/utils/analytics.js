@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api';
 
-// The two sources on the Statistik page, in fixed order and colors (checked for
-// color blindness): our own counting and Cloudflare's traffic data.
-export const SOURCES = [
-	{ key: 'own', label: 'Egen mätning', color: '#1a6e45' },
-	{ key: 'cloudflare', label: 'Cloudflare', color: '#2a78d6' },
-];
+// The admin shows one number and one line: our own counting and Cloudflare's traffic
+// data added together, never apart (the API sends them as `combined`)
+const COLOR = '#1a6e45';
+const BARS = [{ key: 'total', label: '', color: COLOR }];
 
 export const METRICS = {
 	visits: { label: 'Besök', short: 'besök' },
@@ -113,43 +111,72 @@ export const BREAKDOWNS = [
 	{ value: 'countries', label: 'Länder', name: countryName, unit: 'sidvisningar' },
 ];
 
-// The sources that have numbers for this period (Cloudflare only when it's connected)
-export const activeSources = (data) =>
-	SOURCES.filter((s) => s.key === 'own' || data?.totals.cloudflare);
+// Our own counting and Cloudflare's added together. An older API has no `combined`, so
+// it's added up here the same way (without a comparison with the period before).
+export function combinedOf(data) {
+	if (data.combined) return data.combined;
+	const ownSince = data.sources.own.since;
+	const series = data.series.map((day) => {
+		const own = ownSince && day.date >= ownSince ? day.own : null;
+		const cf = day.cloudflare;
+		if (!own && !cf) return { date: day.date, views: null, visits: null };
+		return {
+			date: day.date,
+			views: (own?.views ?? 0) + (cf?.views ?? 0),
+			visits: (own?.visits ?? 0) + (cf?.visits ?? 0),
+		};
+	});
+	const sum = (metric) => series.reduce((total, day) => total + (day[metric] ?? 0), 0);
+	const rows = (list = []) =>
+		list
+			.map((row) => ({ key: row.key, value: (row.own ?? 0) + (row.cloudflare ?? 0) }))
+			.sort((a, b) => b.value - a.value);
+	const since = [ownSince, data.sources.cloudflare.since].filter(Boolean).sort()[0] ?? null;
+	return {
+		series,
+		totals: { views: sum('views'), visits: sum('visits') },
+		previous: null,
+		breakdown: Object.fromEntries(
+			Object.entries(data.breakdown).map(([kind, list]) => [kind, rows(list)])
+		),
+		since,
+	};
+}
 
-// What each source counts (the API sends null for the rest): Cloudflare's free plan doesn't
-// tell where visitors came from, and our own counting doesn't know countries
-const COUNTS = {
-	own: ['pages', 'referrers', 'devices'],
-	cloudflare: ['pages', 'devices', 'countries'],
-};
-export const breakdownSources = (data, kind) =>
-	activeSources(data).filter((s) => COUNTS[s.key].includes(kind));
+// "+12 %" for a period's total vs the period before, null when they can't be compared
+export function totalChange(data, metric) {
+	const { totals, previous } = combinedOf(data);
+	return previous ? changePercent(totals[metric], previous[metric]) : null;
+}
 
-// The tabs that have a source this period (no countries without Cloudflare)
+export const totalOf = (data, metric) => combinedOf(data).totals[metric];
+
+// The tabs that have numbers: Länder only when Cloudflare is connected
 export const availableBreakdowns = (data) =>
-	BREAKDOWNS.filter((b) => data.breakdown[b.value] && breakdownSources(data, b.value).length);
+	BREAKDOWNS.filter(
+		(b) => b.value !== 'countries' || combinedOf(data).breakdown.countries?.length
+	);
 
-// Values per day for <TrendChart>. Days a source has no numbers for (before our own
-// counting started, or older than Cloudflare keeps) are null (not drawn) instead of 0.
-export const trendSeries = (data, metric) =>
-	activeSources(data).map((s) => ({
-		...s,
-		values: data.series.map((day) => {
-			if (s.key === 'own') {
-				const since = data.sources.own.since;
-				return !since || day.date < since ? null : day.own[metric];
-			}
-			return day.cloudflare ? day.cloudflare[metric] : null;
-		}),
-	}));
+// Values per day for <TrendChart>. Days nothing was counted (before counting started) are
+// null (not drawn) instead of 0.
+export const trendSeries = (data, metric) => [
+	{
+		key: 'total',
+		label: METRICS[metric].label,
+		color: COLOR,
+		values: combinedOf(data).series.map((day) => day[metric]),
+	},
+];
+
+// For <BarList series={…}>
+export const barSeries = () => BARS;
 
 // Rows for <BarList>, the biggest first
 export function breakdownRows(data, kind, limit) {
 	const { name } = BREAKDOWNS.find((b) => b.value === kind);
-	return data.breakdown[kind].slice(0, limit).map((row) => ({
+	return (combinedOf(data).breakdown[kind] ?? []).slice(0, limit).map((row) => ({
 		key: row.key,
 		label: name(row.key),
-		values: { own: row.own, cloudflare: row.cloudflare },
+		values: { total: row.value },
 	}));
 }

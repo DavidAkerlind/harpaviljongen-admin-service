@@ -21,19 +21,20 @@ import { TableRowsOutlined, ShowChart } from '@mui/icons-material';
 import { ANALYTICS_RANGES } from '../api';
 import { useAuth } from '../auth/AuthContext';
 import { PageHeader } from '../components/PageHeader';
-import { Legend, TrendChart } from '../components/charts/TrendChart';
+import { TrendChart } from '../components/charts/TrendChart';
 import { BarList } from '../components/charts/BarList';
 import { StatTile } from '../components/charts/StatTile';
 import {
 	BREAKDOWNS,
 	METRICS,
-	activeSources,
 	availableBreakdowns,
+	barSeries,
 	breakdownRows,
-	breakdownSources,
-	changePercent,
+	combinedOf,
 	formatLongDay,
 	formatNumber,
+	totalChange,
+	totalOf,
 	trendSeries,
 	useAnalytics,
 } from '../utils/analytics';
@@ -47,7 +48,7 @@ export function StatisticsPage() {
 		<>
 			<PageHeader
 				title="Statistik"
-				description="Besök på harpaviljongen.com. Vi räknar själva utan cookies och visar Cloudflares siffror bredvid."
+				description="Besök på harpaviljongen.com. Vår egen räkning utan cookies och Cloudflares siffror, ihoplagda."
 				actions={
 					<ToggleButtonGroup
 						exclusive
@@ -98,7 +99,6 @@ export function StatisticsPage() {
 }
 
 function Totals({ data }) {
-	const { own, ownPrevious, cloudflare } = data.totals;
 	return (
 		<Box
 			sx={{
@@ -110,9 +110,8 @@ function Totals({ data }) {
 				<StatTile
 					key={metric}
 					label={`${METRICS[metric].label}, ${data.range.days} dagar`}
-					value={own[metric]}
-					change={changePercent(own[metric], ownPrevious[metric])}
-					cloudflare={cloudflare?.[metric]}
+					value={totalOf(data, metric)}
+					change={totalChange(data, metric)}
 				/>
 			))}
 		</Box>
@@ -123,6 +122,7 @@ function TrendCard({ data }) {
 	const [metric, setMetric] = useState('visits');
 	const [asTable, setAsTable] = useState(false);
 	const series = trendSeries(data, metric);
+	const days = combinedOf(data).series;
 
 	return (
 		<Card>
@@ -159,38 +159,22 @@ function TrendCard({ data }) {
 						</Button>
 					</Box>
 				</Box>
-				{series.length > 1 && (
-					<Box sx={{ mb: 1 }}>
-						<Legend series={series} />
-					</Box>
-				)}
 				{asTable ? (
 					<Box sx={{ maxHeight: 280, overflow: 'auto' }}>
 						<Table size="small" stickyHeader>
 							<TableHead>
 								<TableRow>
 									<TableCell>Dag</TableCell>
-									{series.map((s) => (
-										<TableCell key={s.key} align="right">
-											{s.label}
-										</TableCell>
-									))}
+									<TableCell align="right">{METRICS[metric].label}</TableCell>
 								</TableRow>
 							</TableHead>
 							<TableBody>
-								{[...data.series].reverse().map((day) => (
+								{[...days].reverse().map((day) => (
 									<TableRow key={day.date}>
 										<TableCell>{formatLongDay(day.date)}</TableCell>
-										{series.map((s) => (
-											<TableCell
-												key={s.key}
-												align="right"
-												sx={{ fontVariantNumeric: 'tabular-nums' }}>
-												{s.values[data.series.indexOf(day)] === null
-													? '–'
-													: formatNumber(day[s.key]?.[metric])}
-											</TableCell>
-										))}
+										<TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+											{day[metric] === null ? '–' : formatNumber(day[metric])}
+										</TableCell>
 									</TableRow>
 								))}
 							</TableBody>
@@ -198,7 +182,7 @@ function TrendCard({ data }) {
 					</Box>
 				) : (
 					<TrendChart
-						dates={data.series.map((d) => d.date)}
+						dates={days.map((d) => d.date)}
 						series={series}
 						height={280}
 						label={`${METRICS[metric].label} per dag, ${data.range.days} dagar`}
@@ -214,7 +198,6 @@ function BreakdownCard({ data }) {
 	const tabs = availableBreakdowns(data);
 	// Länder is gone when Cloudflare isn't connected
 	const kind = tabs.some((b) => b.value === chosen) ? chosen : 'pages';
-	const sources = breakdownSources(data, kind);
 	const rows = breakdownRows(data, kind);
 	const unit = BREAKDOWNS.find((b) => b.value === kind).unit;
 
@@ -230,16 +213,10 @@ function BreakdownCard({ data }) {
 						<Tab key={b.value} value={b.value} label={b.label} />
 					))}
 				</Tabs>
-				{/* Also when only one of the two counts this tab, so it's clear which one */}
-				{activeSources(data).length > 1 && sources.length > 0 && (
-					<Box sx={{ mb: 1.5 }}>
-						<Legend series={sources} shape="rect" />
-					</Box>
-				)}
 				{rows.length === 0 ? (
 					<Typography color="text.secondary">Inga besök den här perioden än.</Typography>
 				) : (
-					<BarList rows={rows} series={sources} unit={unit} />
+					<BarList rows={rows} series={barSeries()} unit={unit} />
 				)}
 			</CardContent>
 		</Card>
@@ -248,10 +225,11 @@ function BreakdownCard({ data }) {
 
 function SourcesNote({ data }) {
 	const { isAdmin } = useAuth();
-	const { own, cloudflare } = data.sources;
+	const { cloudflare } = data.sources;
+	const { since } = combinedOf(data);
 	return (
 		<Box sx={{ display: 'grid', gap: 1 }}>
-			{!own.since && (
+			{!since && (
 				<Alert severity="info" variant="outlined" sx={{ bgcolor: 'background.paper' }}>
 					Inga sidvisningar räknade än. Öppna harpaviljongen.com och ladda om den här
 					sidan efter en minut. Besök från webbläsare med annonsblockerare räknas
@@ -271,12 +249,12 @@ function SourcesNote({ data }) {
 				</Alert>
 			)}
 			<Typography variant="body2" color="text.secondary">
-				{own.since && `Egen mätning sedan ${formatDate(own.since)}. `}
-				{cloudflare.since && `Cloudflare sedan ${formatDate(cloudflare.since)}. `}
+				{since && `Räknat sedan ${formatDate(since)}. `}
+				{cloudflare.status === 'ok'
+					? 'Siffrorna är vår egen räkning och Cloudflares, ihoplagda. '
+					: 'Siffrorna är vår egen räkning. '}
 				Besök = sidvisningar som inte kom från en annan sida på hemsidan. Robotar räknas
 				inte.
-				{cloudflare.status === 'ok' &&
-					' Cloudflare ser bara när en sida laddas, inte klick vidare på hemsidan, så dess sidvisningar blir färre.'}
 				{cloudflare.status === 'off' && !isAdmin && ' Cloudflare är inte kopplat.'}
 			</Typography>
 		</Box>

@@ -1,14 +1,9 @@
 import { Box, Card, CardContent, Typography } from '@mui/material';
-import { SOURCES, formatNumber } from '../../utils/analytics';
+import { formatNumber } from '../../utils/analytics';
 
-const Key = ({ color }) => (
-	<Box sx={{ width: 10, height: 2, borderRadius: 1, bgcolor: color, flexShrink: 0 }} />
-);
-
-// Our own number big, its change vs the period before, and Cloudflare's number under it
-// when Cloudflare is connected. compact: without its own card (inside a dashboard widget).
-export function StatTile({ label, value, change, cloudflare, compact = false }) {
-	const hasCloudflare = cloudflare !== undefined && cloudflare !== null;
+// A number big and its change vs the period before. compact: without its own card
+// (inside a dashboard widget).
+export function StatTile({ label, value, change, compact = false }) {
 	const content = (
 		<>
 			<Typography variant="body2" color="text.secondary" noWrap>
@@ -28,30 +23,6 @@ export function StatTile({ label, value, change, cloudflare, compact = false }) 
 					</Typography>
 				)}
 			</Box>
-			{hasCloudflare && (
-				<Box
-					sx={{
-						display: 'flex',
-						flexWrap: 'wrap',
-						alignItems: 'center',
-						columnGap: 1.5,
-						rowGap: 0.25,
-						mt: 0.75,
-					}}>
-					<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-						<Key color={SOURCES[0].color} />
-						<Typography variant="body2" color="text.secondary">
-							{SOURCES[0].label}
-						</Typography>
-					</Box>
-					<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-						<Key color={SOURCES[1].color} />
-						<Typography variant="body2" color="text.secondary">
-							{SOURCES[1].label}: {formatNumber(cloudflare)}
-						</Typography>
-					</Box>
-				</Box>
-			)}
 		</>
 	);
 

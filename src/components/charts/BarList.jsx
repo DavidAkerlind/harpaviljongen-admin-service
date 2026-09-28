@@ -17,7 +17,8 @@ export function BarList({ rows, series, unit }) {
 							<Box sx={{ fontWeight: 600, mb: 0.25 }}>{row.label}</Box>
 							{series.map((s) => (
 								<Box key={s.key}>
-									{formatNumber(row.values[s.key])} {unit} · {s.label}
+									{formatNumber(row.values[s.key])} {unit}
+									{s.label && ` · ${s.label}`}
 								</Box>
 							))}
 						</Box>
