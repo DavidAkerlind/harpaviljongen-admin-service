@@ -89,7 +89,7 @@ export function HeroSettingsCard({ settings, onChange }) {
 									max={HERO_INTERVAL.max}
 									step={1}
 									marks={MARKS}
-											valueLabelDisplay="auto"
+									valueLabelDisplay="auto"
 									valueLabelFormat={(v) => `${v} s`}
 									getAriaValueText={(v) => `${v} sekunder`}
 									aria-labelledby="hero-interval"
@@ -113,7 +113,7 @@ export function HeroSettingsCard({ settings, onChange }) {
 								exclusive
 								size="small"
 								value={settings.shuffle ? 'shuffle' : 'order'}
-									aria-labelledby="hero-order"
+								aria-labelledby="hero-order"
 								onChange={(_e, value) => value && onChange({ shuffle: value === 'shuffle' })}
 								sx={{ width: { xs: '100%', sm: 'auto' }, '& .MuiToggleButton-root': { flex: 1, px: 2, gap: 0.75, textTransform: 'none', fontWeight: 600, whiteSpace: 'nowrap' } }}>
 								<ToggleButton value="order">
