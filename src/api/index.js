@@ -98,6 +98,29 @@ export const api = {
 		client.patch(`/menu-pdfs/${id}`, { title }).then((r) => r.data),
 	deletePdf: (id) => client.delete(`/menu-pdfs/${id}`).then((r) => r.data),
 
+	// Startbild: { settings: { slideshow, intervalSeconds, shuffle }, images: [...in order] }
+	getHero: () => client.get('/hero').then((r) => r.data),
+	uploadHeroImage: (file, onProgress) => {
+		const form = new FormData();
+		form.append('file', file);
+		return client
+			.post('/hero/images', form, {
+				timeout: 120000,
+				onUploadProgress: (e) =>
+					e.total && onProgress?.(Math.round((e.loaded / e.total) * 100)),
+			})
+			.then((r) => r.data);
+	},
+	// fields: { shown?, focus?: { x, y } }
+	updateHeroImage: (id, fields) =>
+		client.patch(`/hero/images/${id}`, fields).then((r) => r.data),
+	deleteHeroImage: (id) => client.delete(`/hero/images/${id}`).then((r) => r.data),
+	// Every photo's id in the new order. Returns the photos
+	reorderHero: (ids) => client.put('/hero/order', { ids }).then((r) => r.data),
+	// { slideshow?, intervalSeconds?, shuffle? }. Returns the settings
+	updateHeroSettings: (settings) =>
+		client.put('/hero/settings', settings).then((r) => r.data),
+
 	// Ändringar. params: { limit, from, to (ISO, to exclusive), category, userId, before }
 	// Returns { items, total, hasMore }
 	getActivity: (params) =>

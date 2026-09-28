@@ -49,6 +49,11 @@ const SWEDISH_API_MESSAGES = {
 	'Only JPG, PNG or WebP images are allowed':
 		'Bilden måste vara en JPG, PNG eller WebP.',
 	'The image is too large (max 5 MB)': 'Bilden är för stor (max 5 MB).',
+	'The image is too large (max 10 MB)': 'Bilden är för stor (max 10 MB).',
+	'At most 30 photos. Delete one before uploading more.':
+		'Det får finnas högst 30 bilder. Ta bort någon först.',
+	"ids must be every photo's id once. The photos may have changed, reload.":
+		'Bilderna har ändrats någon annanstans. Ladda om sidan.',
 	'A menu with that name already exists': 'Det finns redan en meny med det namnet.',
 	'Menu not found': 'Menyn finns inte längre. Ladda om sidan.',
 	'There can be at most 20 menus': 'Det kan finnas högst 20 menyer.',

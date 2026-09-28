@@ -20,6 +20,7 @@ import { OverviewPage } from './pages/OverviewPage';
 import { MenusPage } from './pages/MenusPage';
 import { OpeningHoursPage } from './pages/OpeningHoursPage';
 import { PagesPage } from './pages/PagesPage';
+import { HeroPage } from './pages/HeroPage';
 import { UsersPage } from './pages/UsersPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ActivityPage } from './pages/ActivityPage';
@@ -76,6 +77,7 @@ export default function App() {
 								<Route path="menyer/:list" element={<MenusPage />} />
 								<Route path="oppettider" element={<OpeningHoursPage />} />
 								<Route path="sidor" element={<PagesPage />} />
+								<Route path="startbild" element={<HeroPage />} />
 								<Route path="profil" element={<ProfilePage />} />
 								<Route path="statistik" element={<StatisticsPage />} />
 								<Route path="logg" element={<ActivityPage />} />

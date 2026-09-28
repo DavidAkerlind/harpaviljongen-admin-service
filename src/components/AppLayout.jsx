@@ -33,6 +33,7 @@ import {
 	InsightsOutlined,
 	HistoryOutlined,
 	MoreHoriz,
+	WallpaperOutlined,
 } from '@mui/icons-material';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../api';
@@ -67,6 +68,8 @@ const CONTENT_ITEMS = [
 	{ label: 'Öppettider', to: '/oppettider', icon: <ScheduleOutlined /> },
 	{ label: 'Sidor', to: '/sidor', icon: <WebOutlined /> },
 ];
+// The home page's photos
+const HERO_ITEM = { label: 'Startbild', to: '/startbild', icon: <WallpaperOutlined /> };
 const LOG_ITEM = { label: 'Logg', to: '/logg', icon: <HistoryOutlined /> };
 // Only for admins
 const USERS_ITEM = {
@@ -80,6 +83,7 @@ const sidebarItems = (isAdmin) => [
 	OVERVIEW_ITEM,
 	STATS_ITEM,
 	...CONTENT_ITEMS,
+	HERO_ITEM,
 	LOG_ITEM,
 	...(isAdmin ? [USERS_ITEM] : []),
 ];
@@ -87,6 +91,7 @@ const sidebarItems = (isAdmin) => [
 const BOTTOM_ITEMS = [OVERVIEW_ITEM, ...CONTENT_ITEMS];
 const moreItems = (isAdmin) => [
 	STATS_ITEM,
+	HERO_ITEM,
 	LOG_ITEM,
 	...(isAdmin ? [USERS_ITEM] : []),
 ];

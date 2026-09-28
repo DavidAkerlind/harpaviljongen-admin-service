@@ -250,25 +250,3 @@ export function TrendChart({ dates, series, height: heightProp = 240, compact = 
 		</Box>
 	);
 }
-
-// Legend for two or more series: a short line in the series color + its name
-export function Legend({ series, shape = 'line' }) {
-	return (
-		<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-			{series.map((s) => (
-				<Box key={s.key} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-					<Box
-						sx={
-							shape === 'line'
-								? { width: 14, height: 2, borderRadius: 1, bgcolor: s.color }
-								: { width: 10, height: 10, borderRadius: '3px', bgcolor: s.color }
-						}
-					/>
-					<Typography variant="body2" color="text.secondary">
-						{s.label}
-					</Typography>
-				</Box>
-			))}
-		</Box>
-	);
-}
