@@ -6,6 +6,7 @@ export const ACTIVITY_CATEGORIES = [
 	{ value: 'menus', label: 'Menyer' },
 	{ value: 'openingHours', label: 'Öppettider' },
 	{ value: 'pages', label: 'Sidor' },
+	{ value: 'hero', label: 'Startbild' },
 	{ value: 'users', label: 'Användare' },
 	{ value: 'account', label: 'Konton och profiler' },
 	{ value: 'log', label: 'Loggen' },
@@ -99,6 +100,29 @@ export function describeActivity({ type, details = {} }) {
 						} ${PLACEMENT_TEXT[placement] ?? placement}`
 				)
 			);
+		case 'hero.upload':
+			return `laddade upp startbilden “${details.name}”${details.score ? ` (kvalitet ${details.score}/10)` : ''}`;
+		case 'hero.show':
+			return `visar startbilden “${details.name}” på hemsidan`;
+		case 'hero.hide':
+			return `slutade visa startbilden “${details.name}”`;
+		case 'hero.focus':
+			return `ändrade fokus i startbilden “${details.name}”`;
+		case 'hero.order':
+			return details.firstChanged && details.first
+				? `satte “${details.first}” som första startbild`
+				: 'ändrade ordningen på startbilderna';
+		case 'hero.delete':
+			return `tog bort startbilden “${details.name}”`;
+		case 'hero.settings':
+			return joinSv(
+				(details.changes ?? []).map(({ setting, value }) => {
+					if (setting === 'slideshow') return value ? 'slog på bildspelet' : 'stängde av bildspelet';
+					if (setting === 'intervalSeconds') return `ändrade tiden per startbild till ${value} sekunder`;
+					if (setting === 'shuffle') return value ? 'visar startbilderna i slumpad ordning' : 'visar startbilderna i sin ordning';
+					return `ändrade ${setting}`;
+				})
+			) || 'ändrade startbildens inställningar';
 		case 'user.create':
 			return `lade till ${details.username} som ${roleText(details.role)}`;
 		case 'user.role':
