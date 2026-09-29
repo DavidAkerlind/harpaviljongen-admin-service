@@ -15,6 +15,7 @@ import {
 	MenuItem,
 	Toolbar,
 	Typography,
+	useMediaQuery,
 } from '@mui/material';
 import {
 	SpaceDashboardOutlined,
@@ -31,6 +32,7 @@ import {
 	HistoryOutlined,
 	MoreHoriz,
 	WallpaperOutlined,
+	HomeRounded,
 } from '@mui/icons-material';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../api';
@@ -56,16 +58,15 @@ const STATS_ITEM = {
 	to: '/statistik',
 	icon: <InsightsOutlined />,
 };
-const CONTENT_ITEMS = [
-	{
-		label: 'Menyer',
-		to: '/menyer/food',
-		match: '/menyer',
-		icon: <MenuBookOutlined />,
-	},
-	{ label: 'Öppettider', to: '/oppettider', icon: <ScheduleOutlined /> },
-	{ label: 'Sidor', to: '/sidor', icon: <WebOutlined /> },
-];
+const MENUS_ITEM = {
+	label: 'Menyer',
+	to: '/menyer/food',
+	match: '/menyer',
+	icon: <MenuBookOutlined />,
+};
+const HOURS_ITEM = { label: 'Öppettider', to: '/oppettider', icon: <ScheduleOutlined /> };
+const PAGES_ITEM = { label: 'Sidor', to: '/sidor', icon: <WebOutlined /> };
+const CONTENT_ITEMS = [MENUS_ITEM, HOURS_ITEM, PAGES_ITEM];
 // The home page's photos
 const HERO_ITEM = { label: 'Startbild', to: '/startbild', icon: <WallpaperOutlined /> };
 const LOG_ITEM = { label: 'Logg', to: '/logg', icon: <HistoryOutlined /> };
@@ -85,11 +86,11 @@ const sidebarItems = (isAdmin) => [
 	LOG_ITEM,
 	...(isAdmin ? [USERS_ITEM] : []),
 ];
-// The dock on phones: the everyday pages, the rest behind "Mer"
-const BOTTOM_ITEMS = [OVERVIEW_ITEM, ...CONTENT_ITEMS];
+// The dock on phones: Startbild and Mer on the left, Översikt as the round button in the
+// middle, Menyer and Öppettider on the right. The rest is behind "Mer".
 const moreItems = (isAdmin) => [
 	STATS_ITEM,
-	HERO_ITEM,
+	PAGES_ITEM,
 	LOG_ITEM,
 	...(isAdmin ? [USERS_ITEM] : []),
 ];
@@ -305,8 +306,16 @@ function MobileBars() {
 	const { user, isAdmin } = useAuth();
 	const [moreAnchor, setMoreAnchor] = useState(null);
 	const more = moreItems(isAdmin);
-	const current = BOTTOM_ITEMS.findIndex((item) => isActive(item, pathname));
 	const moreActive = more.some((item) => isActive(item, pathname));
+	// Smaller on the narrowest phones (320 px) so the dock still fits when it magnifies
+	const narrow = useMediaQuery('(max-width: 359.95px)');
+	const link = (item) => ({
+		key: item.to,
+		label: item.label,
+		icon: item.icon,
+		to: item.to,
+		active: isActive(item, pathname),
+	});
 
 	return (
 		<>
@@ -354,13 +363,7 @@ function MobileBars() {
 				<Dock
 					label="Meny"
 					items={[
-						...BOTTOM_ITEMS.map((item, index) => ({
-							key: item.to,
-							label: item.label,
-							icon: item.icon,
-							to: item.to,
-							active: !moreActive && current === index,
-						})),
+						link(HERO_ITEM),
 						{
 							key: 'more',
 							label: 'Mer',
@@ -369,20 +372,29 @@ function MobileBars() {
 							active: moreActive,
 							onClick: (e) => setMoreAnchor(e.currentTarget),
 						},
+						{
+							...link(OVERVIEW_ITEM),
+							icon: <HomeRounded />,
+							variant: 'home',
+							size: narrow ? 58 : 66,
+							magnification: narrow ? 62 : 72,
+						},
+						link(MENUS_ITEM),
+						link(HOURS_ITEM),
 					]}
-					baseItemSize={46}
-					magnification={62}
-					distance={110}
-					panelHeight={62}
+					baseItemSize={narrow ? 44 : 52}
+					magnification={narrow ? 54 : 64}
+					distance={narrow ? 80 : 100}
+					panelHeight={narrow ? 60 : 68}
 				/>
 			</Box>
 			<Menu
 				anchorEl={moreAnchor}
 				open={Boolean(moreAnchor)}
 				onClose={() => setMoreAnchor(null)}
-				anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-				transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-				slotProps={{ paper: { sx: { minWidth: 200, mt: -1 } } }}>
+				anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+				transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+				slotProps={{ paper: { sx: { minWidth: 200, mt: -1.5 } } }}>
 				{more.map((item) => (
 					<MenuItem
 						key={item.to}
@@ -410,7 +422,7 @@ export function AppLayout() {
 					ml: { md: `${DRAWER_WIDTH}px` },
 					px: { xs: 2, sm: 3, md: 5 },
 					pt: { xs: 3, md: 5 },
-					pb: { xs: 'calc(96px + env(safe-area-inset-bottom))', md: 6 },
+					pb: { xs: 'calc(112px + env(safe-area-inset-bottom))', md: 6 },
 				}}>
 				<Box sx={{ maxWidth: 1080, mx: 'auto' }}>
 					<MenuListsProvider>

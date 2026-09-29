@@ -6,7 +6,7 @@ It covers what the restaurant actually updates:
 | Page | What it does |
 | --- | --- |
 | **Översikt** | Widgets you arrange yourself: *Besökare*, *Senaste ändringar*, *Menyer*, *Öppettider*, *Driftstatus*, *Sidor på hemsidan* and *Populära sidor*. **Anpassa** lets you add and remove widgets, make them small (¼), medium (½) or large (full width) and drag them around (or move them with the keyboard). The layout is saved on your account, so it follows you to other devices; **Återställ** goes back to the standard layout. On a 14" laptop four widgets fill the screen. |
-| **Statistik** (`/statistik`) | Visits and page views for 7, 30 or 90 days: two numbers, visits/page views per day (chart or table), and the most visited pages, referrers, devices and countries. One number and one line: our own counting (no cookies) and Cloudflare's traffic data added together, when Cloudflare is connected in the API. |
+| **Statistik** (`/statistik`) | Visits and page views for 7, 30 or 90 days: two numbers, visits/page views per day (chart or table), and the most visited pages, referrers, devices and countries. One number and one line: our own counting (no cookies) and Cloudflare's traffic data added together, when Cloudflare is connected in the API. Below that, **Nyhetsbrev**: subscribers now, new and cancelled subscriptions per day, signups through the website's field and the latest newsletters sent with how many opened (from Get a Newsletter when `GETANEWSLETTER_API_TOKEN` is set in the API). |
 | **Menyer** | *Meny*, *Vinlista* and your own menus in a switch at the top (click, drag the green thumb or use the arrow keys). **Ny meny** (top right) creates one, e.g. *Lunchmeny*; **Inställningar** renames it, chooses whether the website shows its button in the menu and/or on the homepage, or deletes it (not Meny/Vinlista). Upload PDFs (the dashed card first in the grid: click it or drop a PDF on it), preview, rename (pencil), choose which one the website links to, stop showing, delete. Only one per menu is active. |
 | **Öppettider** | The whole week in one save. A switch per day for open/closed. |
 | **Sidor** | Show or hide *Chambre séparée*, *Evenemang* and *Galleri*, separately in the navbar and as a button on the homepage. Hidden pages still open with a direct link. |
@@ -16,7 +16,7 @@ It covers what the restaurant actually updates:
 | **Min profil** (`/profil`) | Everyone. Profile picture (cropped to a square in the browser before upload), display name, username, password. Opened from your name at the bottom of the sidebar (on phones: your picture top right). |
 | **Byt lösenord** | Also directly in that menu. Your other devices are logged out. |
 
-On phones the dock at the bottom has Översikt, Menyer, Öppettider and Sidor; **Mer** opens Statistik, Startbild, Logg and (for admins) Användare. Slide a finger along the dock to magnify it and see the names; lift it to open that page.
+On phones the dock at the bottom has Startbild and **Mer** on the left, Översikt as the big round home button in the middle, and Menyer and Öppettider on the right; **Mer** opens Statistik, Sidor, Logg and (for admins) Användare. Slide a finger along the dock to magnify it and see the names; lift it to open that page.
 
 After every save a toast confirms it at the bottom (a red one if it failed). It closes by itself after a few seconds; swipe it down to close it sooner.
 

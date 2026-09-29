@@ -21,6 +21,7 @@ import { Segment } from '../components/Segment';
 import { TrendChart } from '../components/charts/TrendChart';
 import { BarList } from '../components/charts/BarList';
 import { StatTile } from '../components/charts/StatTile';
+import { NewsletterStats } from '../components/newsletter/NewsletterStats';
 import {
 	BREAKDOWNS,
 	METRICS,
@@ -45,7 +46,7 @@ export function StatisticsPage() {
 		<>
 			<PageHeader
 				title="Statistik"
-				description="Besök på harpaviljongen.com. Vår egen räkning utan cookies och Cloudflares siffror, ihoplagda."
+				description="Besök på harpaviljongen.com, vår egen räkning utan cookies och Cloudflares siffror ihoplagda. Längre ner: nyhetsbrevet."
 				actions={
 					<Segment
 						label="Period"
@@ -85,6 +86,8 @@ export function StatisticsPage() {
 					<SourcesNote data={data} />
 				</Box>
 			)}
+
+			<NewsletterStats range={range} />
 		</>
 	);
 }

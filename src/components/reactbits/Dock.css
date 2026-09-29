@@ -48,6 +48,25 @@
   box-shadow: 0 4px 12px rgba(6, 52, 36, 0.3);
 }
 
+/* The round button in the middle (Översikt): always green, a bit bigger and raised above
+   the others, with a white ring against the panel. The current page gets a sage ring too. */
+.dock-item--home {
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background-color: #063424;
+  color: #ffffff;
+  box-shadow:
+    0 0 0 3px #ffffff,
+    0 6px 16px rgba(6, 52, 36, 0.35);
+}
+
+.dock-item--home.dock-item--active {
+  box-shadow:
+    0 0 0 3px #ffffff,
+    0 0 0 5px #a7b19c,
+    0 6px 16px rgba(6, 52, 36, 0.35);
+}
+
 .dock-item:focus-visible {
   outline: 2px solid #063424;
   outline-offset: 2px;

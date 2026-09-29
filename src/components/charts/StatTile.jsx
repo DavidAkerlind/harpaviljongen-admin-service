@@ -2,8 +2,8 @@ import { Box, Card, CardContent, Typography } from '@mui/material';
 import { formatNumber } from '../../utils/analytics';
 
 // A number big and its change vs the period before. compact: without its own card
-// (inside a dashboard widget).
-export function StatTile({ label, value, change, compact = false }) {
+// (inside a dashboard widget). note: a short line under the number.
+export function StatTile({ label, value, change, note, compact = false }) {
 	const content = (
 		<>
 			<Typography variant="body2" color="text.secondary" noWrap>
@@ -23,6 +23,11 @@ export function StatTile({ label, value, change, compact = false }) {
 					</Typography>
 				)}
 			</Box>
+			{note && (
+				<Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+					{note}
+				</Typography>
+			)}
 		</>
 	);
 
