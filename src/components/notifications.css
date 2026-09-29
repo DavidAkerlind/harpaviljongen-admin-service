@@ -58,6 +58,6 @@
 	.toast-stack {
 		left: 50%;
 		/* Above the dock */
-		bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+		bottom: calc(106px + env(safe-area-inset-bottom, 0px));
 	}
 }

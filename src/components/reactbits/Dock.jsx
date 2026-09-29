@@ -3,6 +3,7 @@
 // - the items are links (to) or buttons (onClick), and the current page's item is marked (active)
 // - a finger magnifies too: slide along the dock to see the names, lift it to open that page
 // - the icon grows with its tile, and the panel keeps its height (it's fixed to the bottom)
+// - an item can have its own size (size, magnification) and look (variant: 'home' is round)
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'motion/react';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -16,22 +17,26 @@ function DockItem({ item, index, mouseX, spring, distance, magnification, baseIt
   const ref = useRef(null);
   const [hovered, setHovered] = useState(false);
 
+  const base = item.size ?? baseItemSize;
+  const grown = item.magnification ?? magnification;
   const mouseDistance = useTransform(mouseX, val => {
     const rect = ref.current?.getBoundingClientRect() ?? {
       x: 0,
-      width: baseItemSize
+      width: base
     };
-    return val - rect.x - baseItemSize / 2;
+    return val - rect.x - base / 2;
   });
 
-  const targetSize = useTransform(mouseDistance, [-distance, 0, distance], [baseItemSize, magnification, baseItemSize]);
+  const targetSize = useTransform(mouseDistance, [-distance, 0, distance], [base, grown, base]);
   const size = useSpring(targetSize, spring);
   const iconSize = useTransform(size, s => s * 0.48);
 
   const props = {
     ref,
     style: { width: size, height: size },
-    className: `dock-item${item.active ? ' dock-item--active' : ''}`,
+    className: `dock-item${item.variant ? ` dock-item--${item.variant}` : ''}${
+      item.active ? ' dock-item--active' : ''
+    }`,
     'aria-label': item.label,
     'data-dock-index': index,
     onHoverStart: () => setHovered(true),

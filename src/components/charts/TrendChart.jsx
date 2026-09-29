@@ -12,13 +12,17 @@ const GRID = '#ecebe4';
 const AXIS_TEXT = '#6b736d';
 const CROSSHAIR = '#9aa19b';
 
-// 0, 5, 10, 20, 25, 50, 100… – a round top for the y axis and ~4 steps up to it
+// 0, 5, 10, 20, 25, 50, 100… – a round top for the y axis and ~4 steps up to it. Whole
+// steps only: everything counted is whole numbers (no 0, 0.5, 1… or 2.5 shown rounded).
 function niceScale(max, steps = 4) {
 	if (max <= 0) return { top: steps, step: 1 };
 	const raw = max / steps;
 	const power = 10 ** Math.floor(Math.log10(raw));
 	const step =
-		[1, 2, 2.5, 5, 10].map((m) => m * power).find((s) => s >= raw) ?? 10 * power;
+		[1, 2, 2.5, 5, 10]
+			.map((m) => m * power)
+			.filter((s) => Number.isInteger(s))
+			.find((s) => s >= raw) ?? Math.max(1, 10 * power);
 	return { top: Math.ceil(max / step) * step, step };
 }
 

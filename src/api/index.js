@@ -134,6 +134,9 @@ export const api = {
 	// Statistik, range: '7d' | '30d' | '90d'. Our own numbers and Cloudflare's side by side
 	getAnalytics: (range) =>
 		client.get('/analytics', { params: { range } }).then((r) => r.data),
+	// Statistik's Nyhetsbrev part: signups via the website and Get a Newsletter's numbers
+	getNewsletterStats: (range) =>
+		client.get('/newsletter/stats', { params: { range } }).then((r) => r.data),
 
 	// Användare (bara admin)
 	getUsers: () => client.get('/users').then((r) => r.data ?? []),
