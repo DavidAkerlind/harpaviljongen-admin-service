@@ -7,7 +7,7 @@ It covers what the restaurant actually updates:
 | --- | --- |
 | **Översikt** | Widgets you arrange yourself: *Besökare*, *Senaste ändringar*, *Menyer*, *Öppettider*, *Driftstatus*, *Sidor på hemsidan* and *Populära sidor*. **Anpassa** lets you add and remove widgets, make them small (¼), medium (½) or large (full width) and drag them around (or move them with the keyboard). The layout is saved on your account, so it follows you to other devices; **Återställ** goes back to the standard layout. On a 14" laptop four widgets fill the screen. |
 | **Statistik** (`/statistik`) | Visits and page views for 7, 30 or 90 days: two numbers, visits/page views per day (chart or table), and the most visited pages, referrers, devices and countries. One number and one line: our own counting (no cookies) and Cloudflare's traffic data added together, when Cloudflare is connected in the API. |
-| **Menyer** | *Meny*, *Vinlista* and your own menus as tabs. **Ny meny** (top right) creates one, e.g. *Lunchmeny*; **Inställningar** renames it, chooses whether the website shows its button in the menu and/or on the homepage, or deletes it (not Meny/Vinlista). Upload PDFs (the dashed card first in the grid: click it or drop a PDF on it), preview, rename (pencil), choose which one the website links to, stop showing, delete. Only one per menu is active. |
+| **Menyer** | *Meny*, *Vinlista* and your own menus in a switch at the top (click, drag the green thumb or use the arrow keys). **Ny meny** (top right) creates one, e.g. *Lunchmeny*; **Inställningar** renames it, chooses whether the website shows its button in the menu and/or on the homepage, or deletes it (not Meny/Vinlista). Upload PDFs (the dashed card first in the grid: click it or drop a PDF on it), preview, rename (pencil), choose which one the website links to, stop showing, delete. Only one per menu is active. |
 | **Öppettider** | The whole week in one save. A switch per day for open/closed. |
 | **Sidor** | Show or hide *Chambre séparée*, *Evenemang* and *Galleri*, separately in the navbar and as a button on the homepage. Hidden pages still open with a direct link. |
 | **Startbild** (`/startbild`) | The photos at the top of the homepage. Upload several at once (button, the dashed card, or drop them anywhere on the page); photos over 3840 px are shrunk in the browser first. Each photo gets a quality score from 1 to 10 for how sharp it is on computers and phones (green *Bra*, yellow *Okej*, red *Dålig*). Switch *Visas* per photo, drag (mouse on the photo, finger or keyboard on the handle) to change the order; the first shown photo is marked *Visas först* (also *Visa först* in its menu). Click a photo to set the point that stays in view and see it on a computer and a phone with the dark filter and logo. **Visning**: slideshow on/off (off = only the first photo), time per photo 5–30 s, own or shuffled order (the first photo always first). Everything saves right away. Without shown photos the website uses its built-in photos. |
@@ -16,7 +16,9 @@ It covers what the restaurant actually updates:
 | **Min profil** (`/profil`) | Everyone. Profile picture (cropped to a square in the browser before upload), display name, username, password. Opened from your name at the bottom of the sidebar (on phones: your picture top right). |
 | **Byt lösenord** | Also directly in that menu. Your other devices are logged out. |
 
-On phones the bottom bar has Översikt, Menyer, Öppettider and Sidor; **Mer** opens Statistik, Startbild, Logg and (for admins) Användare.
+On phones the dock at the bottom has Översikt, Menyer, Öppettider and Sidor; **Mer** opens Statistik, Startbild, Logg and (for admins) Användare. Slide a finger along the dock to magnify it and see the names; lift it to open that page.
+
+After every save a toast confirms it at the bottom (a red one if it failed). It closes by itself after a few seconds; swipe it down to close it sooner.
 
 **Roles:** *Personal* (`employee`) can do everything above except **Användare**. *Admin* can do everything. The API enforces this; the admin just hides what you can't use.
 
@@ -25,7 +27,7 @@ The API has more endpoints (menu items, events, wine lists) that this admin deli
 
 ## Tech
 
-React 19, Vite, MUI 7, React Router, Axios, dnd-kit (dragging widgets). The charts are small SVG components (`components/charts`), no chart library. Swedish UI, light theme in the restaurant's green. Works on phones (bottom tab bar) and desktop (sidebar).
+React 19, Vite, MUI 7, React Router, Axios, dnd-kit (dragging widgets), Motion (animations). The charts are small SVG components (`components/charts`), no chart library. From [React Bits](https://reactbits.dev) (`components/reactbits`, JS-CSS variants, in the admin's colours): *SwipeToast* (the toasts, `Notifications.jsx`), *RubberSegment* (the switches on Menyer, Statistik and Startbild, via `Segment.jsx`) and *Dock* (the bar at the bottom on phones). Swedish UI, light theme in the restaurant's green. Works on phones (dock at the bottom) and desktop (sidebar).
 
 ## Run locally
 
@@ -67,7 +69,8 @@ src/
   api/          client.js (axios + token), index.js (all API calls)
   auth/         AuthContext.jsx (login, logout, token check, isAdmin)
   menus/        MenuListsContext.jsx (the menus, shared by all pages)
-  components/   AppLayout, PageHeader, ConfirmDialog, Notifications, UserAvatar, PasswordDialog,
+  components/   AppLayout, PageHeader, ConfirmDialog, Notifications (toasts), Segment, UserAvatar, PasswordDialog,
+                reactbits/* (SwipeToast, RubberSegment, Dock from React Bits),
                 dashboard/* (widgets, registry.js = which widgets exist + layout), charts/*, menus/*,
                 activity/*, pdf/*, users/*, hero/* (Startbild: photo cards, focus dialog, settings)
   pages/        OverviewPage, StatisticsPage, ActivityPage, MenusPage, OpeningHoursPage, PagesPage,
