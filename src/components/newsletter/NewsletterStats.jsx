@@ -259,6 +259,20 @@ function NewsletterRow({ newsletter, first }) {
 	);
 }
 
+// '"A"', '"A" och "B"', '"A", "B" och "C"'
+const quoted = (names) => {
+	const q = names.map((name) => `"${name}"`);
+	return q.length > 1 ? `${q.slice(0, -1).join(', ')} och ${q.at(-1)}` : q[0];
+};
+
+// Which of Get a Newsletter's lists are counted, e.g. 'Räknar listan "Standard list", inte "Test list". '
+function listsText(gan) {
+	const skipped = gan.skippedLists ?? [];
+	if (!skipped.length) return '';
+	const counted = gan.lists.map((list) => list.name);
+	return `Räknar ${counted.length > 1 ? 'listorna' : 'listan'} ${quoted(counted)}, inte ${quoted(skipped)}. `;
+}
+
 function Notes({ data }) {
 	const { isAdmin } = useAuth();
 	const gan = data.getanewsletter;
@@ -288,6 +302,7 @@ function Notes({ data }) {
 			<Typography variant="body2" color="text.secondary">
 				{gan.status === 'ok' &&
 					'Prenumeranter och utskick kommer från Get a Newsletter och gäller alla sätt att anmäla sig, även popupen. De hämtas på nytt var femte minut. '}
+				{gan.status === 'ok' && listsText(gan)}
 				Via hemsidan = fältet längst ner på startsidan
 				{data.website.since
 					? `, räknat sedan ${formatDate(data.website.since)}.`
