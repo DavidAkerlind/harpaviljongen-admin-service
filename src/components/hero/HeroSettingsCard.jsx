@@ -7,12 +7,12 @@ import {
 	Divider,
 	Slider,
 	Switch,
-	ToggleButton,
-	ToggleButtonGroup,
 	Typography,
+	useMediaQuery,
 } from '@mui/material';
 import { FormatListNumbered, Shuffle } from '@mui/icons-material';
 import { HERO_INTERVAL } from '../../utils/hero';
+import { Segment } from '../Segment';
 
 const MARKS = [5, 10, 15, 20, 25, 30].map((value) => ({ value, label: `${value}` }));
 
@@ -42,6 +42,7 @@ function Row({ title, hint, control, id, inline = false }) {
 
 // Visning: slideshow on/off, seconds per photo, own order or shuffled. Saved right away.
 export function HeroSettingsCard({ settings, onChange }) {
+	const wide = useMediaQuery((theme) => theme.breakpoints.up('sm'));
 	// The slider moves freely and saves shortly after it's let go, so moving it step by step
 	// with the arrow keys saves once
 	const [seconds, setSeconds] = useState(settings.intervalSeconds);
@@ -109,20 +110,16 @@ export function HeroSettingsCard({ settings, onChange }) {
 								: 'Bilderna visas i ordningen nedan, med “Visas först” först.'
 						}
 						control={
-							<ToggleButtonGroup
-								exclusive
-								size="small"
+							<Segment
+								label="Ordning"
+								items={[
+									{ value: 'order', label: 'I min ordning', icon: <FormatListNumbered /> },
+									{ value: 'shuffle', label: 'Slumpad', icon: <Shuffle /> },
+								]}
 								value={settings.shuffle ? 'shuffle' : 'order'}
-								aria-labelledby="hero-order"
-								onChange={(_e, value) => value && onChange({ shuffle: value === 'shuffle' })}
-								sx={{ width: { xs: '100%', sm: 'auto' }, '& .MuiToggleButton-root': { flex: 1, px: 2, gap: 0.75, textTransform: 'none', fontWeight: 600, whiteSpace: 'nowrap' } }}>
-								<ToggleButton value="order">
-									<FormatListNumbered fontSize="small" /> I min ordning
-								</ToggleButton>
-								<ToggleButton value="shuffle">
-									<Shuffle fontSize="small" /> Slumpad
-								</ToggleButton>
-							</ToggleButtonGroup>
+								onChange={(value) => onChange({ shuffle: value === 'shuffle' })}
+								fullWidth={!wide}
+							/>
 						}
 					/>
 				</Collapse>

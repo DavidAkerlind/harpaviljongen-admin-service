@@ -14,6 +14,8 @@ export default defineConfig({
 				manualChunks: {
 					react: ['react', 'react-dom', 'react-router-dom'],
 					mui: ['@mui/material', '@emotion/react', '@emotion/styled'],
+					// The animations of the toasts, the segment switches and the dock (React Bits)
+					motion: ['motion'],
 				},
 			},
 		},

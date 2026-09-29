@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
 	AppBar,
-	BottomNavigation,
-	BottomNavigationAction,
 	Box,
 	Button,
 	ButtonBase,
@@ -15,7 +13,6 @@ import {
 	ListItemText,
 	Menu,
 	MenuItem,
-	Paper,
 	Toolbar,
 	Typography,
 } from '@mui/material';
@@ -40,6 +37,7 @@ import { ROLES } from '../api';
 import { SITE_URL } from '../api/client';
 import { useNotify } from './Notifications';
 import { PasswordDialog } from './PasswordDialog';
+import Dock from './reactbits/Dock';
 import { UserAvatar } from './UserAvatar';
 import { displayName } from '../utils/user';
 import { MenuListsProvider } from '../menus/MenuListsContext';
@@ -87,7 +85,7 @@ const sidebarItems = (isAdmin) => [
 	LOG_ITEM,
 	...(isAdmin ? [USERS_ITEM] : []),
 ];
-// Bottom bar on phones: the everyday pages, the rest behind "Mer"
+// The dock on phones: the everyday pages, the rest behind "Mer"
 const BOTTOM_ITEMS = [OVERVIEW_ITEM, ...CONTENT_ITEMS];
 const moreItems = (isAdmin) => [
 	STATS_ITEM,
@@ -341,41 +339,43 @@ function MobileBars() {
 					/>
 				</Toolbar>
 			</AppBar>
-			<Paper
-				elevation={0}
+			{/* The dock: the everyday pages, the rest behind "Mer" */}
+			<Box
 				sx={{
-					display: { md: 'none' },
+					display: { xs: 'flex', md: 'none' },
 					position: 'fixed',
 					insetInline: 0,
-					bottom: 0,
-					zIndex: 10,
-					borderRadius: 0,
-					borderTop: `1px solid ${brand.border}`,
-					pb: 'env(safe-area-inset-bottom)',
+					bottom: 'calc(10px + env(safe-area-inset-bottom))',
+					zIndex: 1100,
+					justifyContent: 'center',
+					pointerEvents: 'none',
+					'& > *': { pointerEvents: 'auto' },
 				}}>
-				<BottomNavigation
-					showLabels
-					value={moreActive ? 'more' : current}
-					sx={{ '& .MuiBottomNavigationAction-root': { minWidth: 0, px: 0.5 } }}>
-					{BOTTOM_ITEMS.map((item, index) => (
-						<BottomNavigationAction
-							key={item.to}
-							value={index}
-							label={item.label}
-							icon={item.icon}
-							component={NavLink}
-							to={item.to}
-						/>
-					))}
-					<BottomNavigationAction
-						value="more"
-						label="Mer"
-						icon={<MoreHoriz />}
-						aria-haspopup="menu"
-						onClick={(e) => setMoreAnchor(e.currentTarget)}
-					/>
-				</BottomNavigation>
-			</Paper>
+				<Dock
+					label="Meny"
+					items={[
+						...BOTTOM_ITEMS.map((item, index) => ({
+							key: item.to,
+							label: item.label,
+							icon: item.icon,
+							to: item.to,
+							active: !moreActive && current === index,
+						})),
+						{
+							key: 'more',
+							label: 'Mer',
+							icon: <MoreHoriz />,
+							haspopup: 'menu',
+							active: moreActive,
+							onClick: (e) => setMoreAnchor(e.currentTarget),
+						},
+					]}
+					baseItemSize={46}
+					magnification={62}
+					distance={110}
+					panelHeight={62}
+				/>
+			</Box>
 			<Menu
 				anchorEl={moreAnchor}
 				open={Boolean(moreAnchor)}

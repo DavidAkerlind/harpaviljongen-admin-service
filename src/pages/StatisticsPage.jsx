@@ -6,21 +6,18 @@ import {
 	Card,
 	CardContent,
 	Skeleton,
-	Tab,
 	Table,
 	TableBody,
 	TableCell,
 	TableHead,
 	TableRow,
-	Tabs,
-	ToggleButton,
-	ToggleButtonGroup,
 	Typography,
 } from '@mui/material';
 import { TableRowsOutlined, ShowChart } from '@mui/icons-material';
 import { ANALYTICS_RANGES } from '../api';
 import { useAuth } from '../auth/AuthContext';
 import { PageHeader } from '../components/PageHeader';
+import { Segment } from '../components/Segment';
 import { TrendChart } from '../components/charts/TrendChart';
 import { BarList } from '../components/charts/BarList';
 import { StatTile } from '../components/charts/StatTile';
@@ -50,18 +47,12 @@ export function StatisticsPage() {
 				title="Statistik"
 				description="Besök på harpaviljongen.com. Vår egen räkning utan cookies och Cloudflares siffror, ihoplagda."
 				actions={
-					<ToggleButtonGroup
-						exclusive
-						size="small"
+					<Segment
+						label="Period"
+						items={ANALYTICS_RANGES}
 						value={range}
-						onChange={(e, value) => value && setRange(value)}
-						aria-label="Period">
-						{ANALYTICS_RANGES.map((r) => (
-							<ToggleButton key={r.value} value={r.value} sx={{ px: 1.75 }}>
-								{r.label}
-							</ToggleButton>
-						))}
-					</ToggleButtonGroup>
+						onChange={setRange}
+					/>
 				}
 			/>
 
@@ -138,18 +129,13 @@ function TrendCard({ data }) {
 					}}>
 					<Typography variant="h3">{METRICS[metric].label} per dag</Typography>
 					<Box sx={{ display: 'flex', gap: 1 }}>
-						<ToggleButtonGroup
-							exclusive
-							size="small"
+						<Segment
+							label="Visa"
+							size="sm"
+							items={Object.entries(METRICS).map(([key, m]) => ({ value: key, label: m.label }))}
 							value={metric}
-							onChange={(e, value) => value && setMetric(value)}
-							aria-label="Visa">
-							{Object.entries(METRICS).map(([key, m]) => (
-								<ToggleButton key={key} value={key} sx={{ py: 0.25, px: 1.25 }}>
-									{m.label}
-								</ToggleButton>
-							))}
-						</ToggleButtonGroup>
+							onChange={setMetric}
+						/>
 						<Button
 							size="small"
 							color="inherit"
@@ -203,16 +189,16 @@ function BreakdownCard({ data }) {
 
 	return (
 		<Card>
-			<CardContent sx={{ p: 2.5, pt: 1.5, '&:last-child': { pb: 2.5 } }}>
-				<Tabs
+			<CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+				<Segment
+					label="Visa mest besökta"
+					size="sm"
+					fullWidth
+					items={tabs}
 					value={kind}
-					onChange={(e, value) => setKind(value)}
-					sx={{ mb: 1.5, minHeight: 40, '& .MuiTab-root': { minHeight: 40, px: 1.5, minWidth: 0 } }}
-					aria-label="Visa mest besökta">
-					{tabs.map((b) => (
-						<Tab key={b.value} value={b.value} label={b.label} />
-					))}
-				</Tabs>
+					onChange={setKind}
+					sx={{ mb: 2 }}
+				/>
 				{rows.length === 0 ? (
 					<Typography color="text.secondary">Inga besök den här perioden än.</Typography>
 				) : (

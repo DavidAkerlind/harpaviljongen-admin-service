@@ -30,4 +30,12 @@ export default [
       ],
     },
   },
+  // The React Bits components, kept as they come: motion.div in JSX, empty catch blocks
+  {
+    files: ['src/components/reactbits/**'],
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^([A-Z_]|motion$)' }],
+      'no-empty': ['error', { allowEmptyCatch: true }],
+    },
+  },
 ]

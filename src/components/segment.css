@@ -1,0 +1,38 @@
+.segment {
+	max-width: 100%;
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+
+.segment::-webkit-scrollbar {
+	display: none;
+}
+
+.segment .rubber-segment {
+	--rs-idle: 0.78;
+	font-family: inherit;
+}
+
+.segment .rubber-segment__item {
+	font-weight: 600;
+	gap: 7px;
+}
+
+.segment .rubber-segment__item svg {
+	font-size: 1.15em;
+}
+
+.segment .rubber-segment__item:focus-visible {
+	outline-color: #063424;
+}
+
+/* The options share the whole width */
+.segment--full .rubber-segment {
+	display: grid;
+	width: 100%;
+}
+
+/* Too many to fit: the row scrolls sideways with a finger too */
+.segment--overflowing .rubber-segment {
+	touch-action: pan-x pan-y;
+}

@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import {
-	Link as RouterLink,
-	Navigate,
-	useNavigate,
-	useParams,
-} from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import {
 	Alert,
 	Box,
@@ -14,8 +9,6 @@ import {
 	Chip,
 	IconButton,
 	Skeleton,
-	Tab,
-	Tabs,
 	Tooltip,
 	Typography,
 	useMediaQuery,
@@ -34,6 +27,7 @@ import { api, LEGACY_MENU_PATHS } from '../api';
 import { useMenuLists } from '../menus/MenuListsContext';
 import { MenuDialog } from '../components/menus/MenuDialog';
 import { PageHeader } from '../components/PageHeader';
+import { Segment } from '../components/Segment';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useNotify } from '../components/Notifications';
 import { PdfThumbnail } from '../components/pdf/PdfThumbnail';
@@ -42,7 +36,6 @@ import { UploadPdfDialog } from '../components/pdf/UploadPdfDialog';
 import { UploadPdfCard } from '../components/pdf/UploadPdfCard';
 import { RenamePdfDialog } from '../components/pdf/RenamePdfDialog';
 import { formatBytes, formatDate, formatDateTime } from '../utils/format';
-import { brand } from '../theme';
 
 const FALLBACK_NAME = '“Ny meny kommer snart”';
 
@@ -51,6 +44,7 @@ export function MenusPage() {
 	const { lists, error, reload } = useMenuLists();
 	const navigate = useNavigate();
 	const notify = useNotify();
+	const wide = useMediaQuery((theme) => theme.breakpoints.up('sm'));
 	// key remounts the dialog on every open, so it starts empty
 	const [creating, setCreating] = useState({ open: false, key: 0 });
 
@@ -90,23 +84,16 @@ export function MenusPage() {
 				<Skeleton variant="rounded" height={48} sx={{ mb: 3 }} />
 			) : (
 				<>
-					<Tabs
+					{/* Meny, Vinlista and the menus created here: the thumb slides to the chosen one */}
+					<Segment
+						label="Välj meny"
+						size="lg"
+						items={lists.map((item) => ({ value: item.type, label: item.label }))}
 						value={type}
-						variant="scrollable"
-						scrollButtons="auto"
-						allowScrollButtonsMobile
-						sx={{ mb: 3, borderBottom: `1px solid ${brand.border}` }}
-						aria-label="Välj meny">
-						{lists.map((item) => (
-							<Tab
-								key={item.type}
-								value={item.type}
-								label={item.label}
-								component={RouterLink}
-								to={`/menyer/${item.type}`}
-							/>
-						))}
-					</Tabs>
+						onChange={(value) => navigate(`/menyer/${value}`)}
+						fullWidth={!wide && lists.length <= 3}
+						sx={{ mb: 3 }}
+					/>
 					{/* key: start fresh when switching between menus */}
 					<PdfManager key={type} list={list} />
 				</>
