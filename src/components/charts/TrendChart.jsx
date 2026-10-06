@@ -26,13 +26,34 @@ function niceScale(max, steps = 4) {
 	return { top: Math.ceil(max / step) * step, step };
 }
 
+// For fit: a round bottom and top just around the values, so small changes in a big
+// number show (like a stock chart). A flat line gets a step of room above and below.
+function fitScale(min, max, steps = 4) {
+	const { step } = niceScale(Math.max(1, max - min), steps);
+	let bottom = Math.floor(min / step) * step;
+	let top = Math.ceil(max / step) * step;
+	if (top === bottom) {
+		bottom -= step;
+		top += step;
+	}
+	return { bottom: Math.max(0, bottom), top, step };
+}
+
 // Values per day as lines, the first series with a light area under it.
 // series: [{ key, label, color, values: (number | null)[] }] with one value per date;
 // null = not measured that day (the line starts later), shown as "–".
 // compact: no y axis and only the first and last date (for dashboard widgets).
+// fit: the y axis fits the values instead of starting at 0 (for a running total).
 // height: pixels, or 'fill' to take the height of the parent (which must have one).
 // Hover or focus + arrow keys shows every series' value for that day.
-export function TrendChart({ dates, series, height: heightProp = 240, compact = false, label }) {
+export function TrendChart({
+	dates,
+	series,
+	height: heightProp = 240,
+	compact = false,
+	fit = false,
+	label,
+}) {
 	const [ref, box] = useSize();
 	const [active, setActive] = useState(null);
 	const width = box.width;
@@ -45,14 +66,17 @@ export function TrendChart({ dates, series, height: heightProp = 240, compact = 
 		: { top: 12, right: 12, bottom: 28, left: 44 };
 	const innerW = Math.max(0, width - m.left - m.right);
 	const innerH = Math.max(0, height - m.top - m.bottom);
-	const max = Math.max(0, ...series.flatMap((s) => s.values.filter((v) => v !== null)));
-	const { top, step } = niceScale(max);
+	const allValues = series.flatMap((s) => s.values.filter((v) => v !== null && v !== undefined));
+	const max = Math.max(0, ...allValues);
+	const { bottom, top, step } = fit
+		? fitScale(Math.min(max, ...allValues), max)
+		: { bottom: 0, ...niceScale(max) };
 	const x = (i) => m.left + (n <= 1 ? innerW / 2 : (i * innerW) / (n - 1));
-	const y = (v) => m.top + innerH - (v / top) * innerH;
+	const y = (v) => m.top + innerH - ((v - bottom) / (top - bottom)) * innerH;
 	const baseline = m.top + innerH;
 
 	const ticks = [];
-	for (let v = 0; v <= top + 1e-9; v += step) ticks.push(v);
+	for (let v = bottom; v <= top + 1e-9; v += step) ticks.push(v);
 
 	// As many date labels as fit, counted back from the last day
 	const labelEvery = compact

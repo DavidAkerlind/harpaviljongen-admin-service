@@ -44,6 +44,36 @@ export function newsletterSeries(data) {
 	}));
 }
 
+// How many more (or fewer) subscribe than when the period started: new minus cancelled
+export const subscriberChange = (gan) => gan.growth.added - gan.growth.cancelled;
+
+// '2026-10-01' -> '2026-09-30'
+const dayBefore = (day) => {
+	const date = new Date(`${day}T00:00:00Z`);
+	date.setUTCDate(date.getUTCDate() - 1);
+	return date.toISOString().slice(0, 10);
+};
+
+// The "Totalt" line: how many subscribed at the end of each day, counted back from the
+// number now with each day's new and cancelled. It starts the day before the period, so
+// it goes from the number then to the number now (the same change as "+N på X dagar").
+// null when it can't be counted (no per-day numbers from Get a Newsletter).
+export function totalSeries(data) {
+	const gan = data.getanewsletter;
+	if (gan.status !== 'ok' || !gan.growth || gan.subscribers === null || !data.series.length) {
+		return null;
+	}
+	const values = [gan.subscribers];
+	for (let i = data.series.length - 1; i >= 0; i--) {
+		const day = data.series[i];
+		values.unshift(Math.max(0, values[0] - (day.added ?? 0) + (day.cancelled ?? 0)));
+	}
+	return {
+		dates: [dayBefore(data.series[0].date), ...data.series.map((day) => day.date)],
+		values,
+	};
+}
+
 // Share of the recipients who opened, in whole percent; null when unknown
 export function openRate(newsletter) {
 	const { uniqueOpens, recipients } = newsletter;
