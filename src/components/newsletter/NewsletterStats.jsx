@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
 	Alert,
 	Box,
@@ -8,13 +9,17 @@ import {
 	Typography,
 } from '@mui/material';
 import { useAuth } from '../../auth/AuthContext';
+import { Segment } from '../Segment';
 import { TrendChart } from '../charts/TrendChart';
 import { StatTile } from '../charts/StatTile';
 import { changePercent, formatNumber } from '../../utils/analytics';
 import { formatDate } from '../../utils/format';
 import {
+	NEWSLETTER_SERIES,
 	newsletterSeries,
 	openRate,
+	subscriberChange,
+	totalSeries,
 	useNewsletterStats,
 	websiteChange,
 } from '../../utils/newsletter';
@@ -66,7 +71,7 @@ export function NewsletterStats({ range }) {
 										: '1fr',
 							},
 						}}>
-						<DailyCard data={data} />
+						<SubscribersCard data={data} />
 						{data.getanewsletter.status === 'ok' && (
 							<NewslettersCard newsletters={data.getanewsletter.newsletters} />
 						)}
@@ -92,10 +97,11 @@ function Tiles({ data }) {
 				note={
 					lists.length
 						? lists.map((l) => `${l.name} ${formatNumber(l.subscribers)}`).join(' · ')
-						: gan.growth &&
-							`${gan.growth.added - gan.growth.cancelled >= 0 ? '+' : '−'}${formatNumber(
-								Math.abs(gan.growth.added - gan.growth.cancelled)
-							)} på ${days} dagar`
+						: gan.growth && (
+								<>
+									<Signed value={subscriberChange(gan)} /> på {days} dagar
+								</>
+							)
 				}
 			/>
 		);
@@ -136,10 +142,54 @@ function Tiles({ data }) {
 	);
 }
 
-function DailyCard({ data }) {
-	const series = newsletterSeries(data);
-	const perDay = series.length > 1;
-	const title = perDay ? 'Nya prenumeranter per dag' : 'Anmälningar via hemsidan per dag';
+// "+78" in green, "−3" in red, "±0" grey
+function Signed({ value }) {
+	return (
+		<Box
+			component="span"
+			sx={{
+				fontWeight: 600,
+				color: value > 0 ? 'success.main' : value < 0 ? 'error.main' : 'text.secondary',
+			}}>
+			{value > 0 ? '+' : value < 0 ? '−' : '±'}
+			{formatNumber(Math.abs(value))}
+		</Box>
+	);
+}
+
+const VIEWS = [
+	{ value: 'total', label: 'Totalt' },
+	{ value: 'daily', label: 'Per dag' },
+];
+
+// Totalt (shown first): how many subscribe, day by day, as one line like a stock chart,
+// green when the period went up and red when it went down. Per dag: new, via the website
+// and cancelled each day. Only Per dag when the total can't be counted per day.
+function SubscribersCard({ data }) {
+	const [view, setView] = useState('total');
+	const total = totalSeries(data);
+	const showTotal = Boolean(total) && view === 'total';
+	const daily = newsletterSeries(data);
+	const perDay = daily.length > 1;
+
+	let title = 'Anmälningar via hemsidan per dag';
+	let dates = data.series.map((d) => d.date);
+	let series = daily;
+	if (showTotal) {
+		const down = subscriberChange(data.getanewsletter) < 0;
+		title = 'Prenumeranter totalt';
+		dates = total.dates;
+		series = [
+			{
+				key: 'total',
+				label: 'prenumeranter',
+				color: NEWSLETTER_SERIES[down ? 'cancelled' : 'added'].color,
+				values: total.values,
+			},
+		];
+	} else if (perDay) {
+		title = 'Nya prenumeranter per dag';
+	}
 
 	return (
 		<Card>
@@ -154,24 +204,35 @@ function DailyCard({ data }) {
 						mb: 1.5,
 					}}>
 					<Typography variant="h3">{title}</Typography>
-					{perDay && (
-						<Box
-							sx={{ display: 'flex', flexWrap: 'wrap', columnGap: 2, rowGap: 0.5 }}
-							aria-hidden="true">
-							{series.map((s) => (
-								<Box key={s.key} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-									<Box sx={{ width: 14, height: 3, borderRadius: 2, bgcolor: s.color }} />
-									<Typography variant="body2" color="text.secondary">
-										{s.label}
-									</Typography>
-								</Box>
-							))}
-						</Box>
+					{total && (
+						<Segment
+							label="Visa prenumeranter"
+							size="sm"
+							items={VIEWS}
+							value={view}
+							onChange={setView}
+						/>
 					)}
 				</Box>
+				{!showTotal && perDay && (
+					<Box
+						sx={{ display: 'flex', flexWrap: 'wrap', columnGap: 2, rowGap: 0.5, mb: 1.5 }}
+						aria-hidden="true">
+						{daily.map((s) => (
+							<Box key={s.key} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+								<Box sx={{ width: 14, height: 3, borderRadius: 2, bgcolor: s.color }} />
+								<Typography variant="body2" color="text.secondary">
+									{s.label}
+								</Typography>
+							</Box>
+						))}
+					</Box>
+				)}
 				<TrendChart
-					dates={data.series.map((d) => d.date)}
+					key={showTotal ? 'total' : 'daily'}
+					dates={dates}
 					series={series}
+					fit={showTotal}
 					height={240}
 					label={`${title}, ${data.range.days} dagar`}
 				/>
