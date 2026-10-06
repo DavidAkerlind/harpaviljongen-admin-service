@@ -16,7 +16,7 @@ It covers what the restaurant actually updates:
 | **Min profil** (`/profil`) | Everyone. Profile picture (cropped to a square in the browser before upload), display name, username, password. Opened from your name at the bottom of the sidebar (on phones: your picture top right). |
 | **Byt lösenord** | Also directly in that menu. Your other devices are logged out. |
 
-On phones the bar at the bottom is liquid glass like iOS: Översikt (the house), Öppettider, Menyer, Startbild and **Mer**, which opens Statistik, Sidor, Logg and (for admins) Användare. The current page sits on a soft pill that slides to the next one. Slide a finger along the bar to move the pill and see the names; lift it to open that page. The glass bends the page at its edges in Chrome-based browsers and is frosted in Safari (so on every iPhone) and Firefox.
+On phones the bar at the bottom is liquid glass like iOS: Översikt (the house), Öppettider, Menyer, Startbild and **Mer**, which opens Statistik, Sidor, Logg and (for admins) Användare. The current page sits on a soft pill that slides to the next one. A tap opens a page as the finger lifts, however quick. Rest or slide a finger on the bar to see the names; the pill follows it, lifting opens that page, and lifting off the bar opens nothing. The glass bends the page at its edges in Chrome-based browsers and is frosted in Safari (so on every iPhone) and Firefox.
 
 After every save a toast confirms it at the bottom (a red one if it failed). It closes by itself after a few seconds; swipe it down to close it sooner.
 

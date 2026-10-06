@@ -7,6 +7,8 @@
 	user-select: none;
 	-webkit-user-select: none;
 	-webkit-tap-highlight-color: transparent;
+	/* No link preview on iPhone when a finger rests on an item (it shows the name instead) */
+	-webkit-touch-callout: none;
 }
 
 /* Both kinds of glass: a white edge lit from the top left, and a soft shadow under it */
