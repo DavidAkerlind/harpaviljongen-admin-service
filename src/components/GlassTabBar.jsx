@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import GlassSurface from './reactbits/GlassSurface';
@@ -7,6 +7,8 @@ import './glass-tab-bar.css';
 const MotionSpan = motion.span;
 const MotionDiv = motion.div;
 const TAP_SLOP = 8; // px a finger can move and still count as a tap
+const LABEL_DELAY = 300; // ms a finger rests on an item before its name shows
+const EDGE_SLOP = 24; // px above or below the bar a finger still counts as on it
 const PILL_SPRING = { type: 'spring', stiffness: 480, damping: 34, mass: 0.9 };
 const PADDING = 6;
 
@@ -33,10 +35,24 @@ export const MoreIcon = () => (
 	</svg>
 );
 
-// The item under a point on the screen, as its index
-function indexAt(x, y) {
-	const el = document.elementFromPoint(x, y)?.closest('[data-tab-index]');
-	return el ? Number(el.dataset.tabIndex) : null;
+// The item under a finger, as its index: the nearest one along the bar (so the edges and the
+// gaps count too), or null when the finger is off the bar
+function indexAt(nav, x, y) {
+	const bar = nav.getBoundingClientRect();
+	if (x < bar.left || x > bar.right || y < bar.top - EDGE_SLOP || y > bar.bottom + EDGE_SLOP) {
+		return null;
+	}
+	let nearest = null;
+	let nearestDistance = Infinity;
+	for (const el of nav.querySelectorAll('[data-tab-index]')) {
+		const box = el.getBoundingClientRect();
+		const distance = Math.max(box.left - x, 0, x - box.right);
+		if (distance < nearestDistance) {
+			nearest = Number(el.dataset.tabIndex);
+			nearestDistance = distance;
+		}
+	}
+	return nearest;
 }
 
 // The phone's bar at the bottom in iOS's liquid glass style: a glass pill with the pages
@@ -49,46 +65,74 @@ export function GlassTabBar({ items, label, height = 64 }) {
 	const reduce = useReducedMotion();
 	const pillId = useId();
 	const touch = useRef(null);
+	const labelTimer = useRef(null);
 	const bar = useRef(null);
 	const [pressed, setPressed] = useState(null);
-	const pillIndex = pressed ?? items.findIndex((item) => item.active);
+	const [showLabel, setShowLabel] = useState(false);
+	// A page just chosen keeps the pill until its route shows, so the pill doesn't jump back
+	const [opening, setOpening] = useState(null);
+	const activeIndex = items.findIndex((item) => item.active);
+	const pillIndex = pressed ?? opening ?? activeIndex;
 	const transition = reduce ? { duration: 0 } : PILL_SPRING;
+
+	useEffect(() => setOpening(null), [activeIndex]);
+
+	// Fingers open the items themselves (onPointerUp), so the browser's own click after a
+	// touch is cancelled: Safari on iPhone drops that click on quick taps when something on
+	// the bar changes under the finger (the pill), and it would open "Mer" a second time
+	useEffect(() => {
+		const nav = bar.current;
+		const cancel = (e) => {
+			if (e.cancelable) e.preventDefault();
+		};
+		nav.addEventListener('touchend', cancel, { passive: false });
+		return () => nav.removeEventListener('touchend', cancel);
+	}, []);
+
+	useEffect(() => () => clearTimeout(labelTimer.current), []);
 
 	const reset = () => {
 		touch.current = null;
+		clearTimeout(labelTimer.current);
 		setPressed(null);
+		setShowLabel(false);
 	};
 
 	const onPointerDown = (e) => {
-		if (e.pointerType === 'mouse') return;
-		// Let the events follow the finger from item to item
+		// Fingers only (a mouse or a pen clicks as usual), and only the first finger
+		if (e.pointerType !== 'touch' || !e.isPrimary) return;
+		const index = indexAt(bar.current, e.clientX, e.clientY);
+		if (index === null) return;
+		// The bar follows the finger until it lifts, also when it slides off the bar
 		try {
-			e.target.releasePointerCapture?.(e.pointerId);
+			bar.current.setPointerCapture(e.pointerId);
 		} catch {
-			// not captured
+			// the finger is already gone
 		}
-		const index = indexAt(e.clientX, e.clientY);
-		touch.current = { id: e.pointerId, x0: e.clientX, start: index, moved: false };
+		touch.current = { id: e.pointerId, x0: e.clientX };
 		setPressed(index);
+		// The name shows when the finger rests or slides, not on a quick tap
+		clearTimeout(labelTimer.current);
+		labelTimer.current = setTimeout(() => setShowLabel(true), LABEL_DELAY);
 	};
 
 	const onPointerMove = (e) => {
 		const t = touch.current;
 		if (!t || t.id !== e.pointerId) return;
-		if (Math.abs(e.clientX - t.x0) > TAP_SLOP) t.moved = true;
-		const index = indexAt(e.clientX, e.clientY);
-		if (index !== null) setPressed(index);
+		if (Math.abs(e.clientX - t.x0) > TAP_SLOP) setShowLabel(true);
+		// Off the bar the pill goes back, and lifting there opens nothing
+		setPressed(indexAt(bar.current, e.clientX, e.clientY));
 	};
 
 	const onPointerUp = (e) => {
 		const t = touch.current;
 		if (!t || t.id !== e.pointerId) return;
-		const index = indexAt(e.clientX, e.clientY) ?? pressed;
+		const index = indexAt(bar.current, e.clientX, e.clientY);
 		reset();
-		// A tap clicks by itself; after sliding to another item, open the one under the finger
-		if (t.moved && index !== null && index !== t.start) {
-			bar.current?.querySelector(`[data-tab-index="${index}"]`)?.click();
-		}
+		if (index === null) return;
+		// Open the item under the finger, whether tapped or slid to
+		if (items[index].to && index !== activeIndex) setOpening(index);
+		bar.current.querySelector(`[data-tab-index="${index}"]`)?.click();
 	};
 
 	return (
@@ -156,7 +200,7 @@ export function GlassTabBar({ items, label, height = 64 }) {
 			</GlassSurface>
 			{/* The name above the finger while it's on the bar (outside the glass, which clips) */}
 			<AnimatePresence>
-				{pressed !== null && (
+				{pressed !== null && showLabel && (
 					<MotionDiv
 						key="label"
 						className="glass-tab-bar__label"
