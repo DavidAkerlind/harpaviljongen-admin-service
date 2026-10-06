@@ -1,5 +1,5 @@
 /* The toasts (SwipeToast): at the bottom, in the middle of the page next to the sidebar
-   (the controls they answer to are mostly to the right), above the dock on a phone. The
+   (the controls they answer to are mostly to the right), above the glass bar on a phone. The
    newest is at the bottom and pushes the older ones up. Swipe one down to close it. */
 .toast-stack {
 	position: fixed;
@@ -57,7 +57,7 @@
 @media (max-width: 899.95px) {
 	.toast-stack {
 		left: 50%;
-		/* Above the dock */
+		/* Above the glass bar */
 		bottom: calc(106px + env(safe-area-inset-bottom, 0px));
 	}
 }
