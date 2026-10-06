@@ -15,7 +15,6 @@ import {
 	MenuItem,
 	Toolbar,
 	Typography,
-	useMediaQuery,
 } from '@mui/material';
 import {
 	SpaceDashboardOutlined,
@@ -30,16 +29,14 @@ import {
 	AccountCircleOutlined,
 	InsightsOutlined,
 	HistoryOutlined,
-	MoreHoriz,
 	WallpaperOutlined,
-	HomeRounded,
 } from '@mui/icons-material';
 import { useAuth } from '../auth/AuthContext';
 import { ROLES } from '../api';
 import { SITE_URL } from '../api/client';
 import { useNotify } from './Notifications';
 import { PasswordDialog } from './PasswordDialog';
-import Dock from './reactbits/Dock';
+import { GlassTabBar, HomeIcon, MoreIcon } from './GlassTabBar';
 import { UserAvatar } from './UserAvatar';
 import { displayName } from '../utils/user';
 import { MenuListsProvider } from '../menus/MenuListsContext';
@@ -86,8 +83,8 @@ const sidebarItems = (isAdmin) => [
 	LOG_ITEM,
 	...(isAdmin ? [USERS_ITEM] : []),
 ];
-// The dock on phones: Startbild and Mer on the left, Översikt as the round button in the
-// middle, Menyer and Öppettider on the right. The rest is behind "Mer".
+// The glass bar on phones: Översikt (a house), Öppettider, Menyer, Startbild and Mer.
+// The rest is behind "Mer".
 const moreItems = (isAdmin) => [
 	STATS_ITEM,
 	PAGES_ITEM,
@@ -307,8 +304,6 @@ function MobileBars() {
 	const [moreAnchor, setMoreAnchor] = useState(null);
 	const more = moreItems(isAdmin);
 	const moreActive = more.some((item) => isActive(item, pathname));
-	// Smaller on the narrowest phones (320 px) so the dock still fits when it magnifies
-	const narrow = useMediaQuery('(max-width: 359.95px)');
 	const link = (item) => ({
 		key: item.to,
 		label: item.label,
@@ -348,7 +343,7 @@ function MobileBars() {
 					/>
 				</Toolbar>
 			</AppBar>
-			{/* The dock: the everyday pages, the rest behind "Mer" */}
+			{/* The glass bar: the everyday pages, the rest behind "Mer" */}
 			<Box
 				sx={{
 					display: { xs: 'flex', md: 'none' },
@@ -360,40 +355,30 @@ function MobileBars() {
 					pointerEvents: 'none',
 					'& > *': { pointerEvents: 'auto' },
 				}}>
-				<Dock
+				<GlassTabBar
 					label="Meny"
 					items={[
+						{ ...link(OVERVIEW_ITEM), icon: <HomeIcon /> },
+						link(HOURS_ITEM),
+						link(MENUS_ITEM),
 						link(HERO_ITEM),
 						{
 							key: 'more',
 							label: 'Mer',
-							icon: <MoreHoriz />,
+							icon: <MoreIcon />,
 							haspopup: 'menu',
 							active: moreActive,
 							onClick: (e) => setMoreAnchor(e.currentTarget),
 						},
-						{
-							...link(OVERVIEW_ITEM),
-							icon: <HomeRounded />,
-							variant: 'home',
-							size: narrow ? 58 : 66,
-							magnification: narrow ? 62 : 72,
-						},
-						link(MENUS_ITEM),
-						link(HOURS_ITEM),
 					]}
-					baseItemSize={narrow ? 44 : 52}
-					magnification={narrow ? 54 : 64}
-					distance={narrow ? 80 : 100}
-					panelHeight={narrow ? 60 : 68}
 				/>
 			</Box>
 			<Menu
 				anchorEl={moreAnchor}
 				open={Boolean(moreAnchor)}
 				onClose={() => setMoreAnchor(null)}
-				anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-				transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+				anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+				transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
 				slotProps={{ paper: { sx: { minWidth: 200, mt: -1.5 } } }}>
 				{more.map((item) => (
 					<MenuItem
@@ -422,7 +407,7 @@ export function AppLayout() {
 					ml: { md: `${DRAWER_WIDTH}px` },
 					px: { xs: 2, sm: 3, md: 5 },
 					pt: { xs: 3, md: 5 },
-					pb: { xs: 'calc(112px + env(safe-area-inset-bottom))', md: 6 },
+					pb: { xs: 'calc(100px + env(safe-area-inset-bottom))', md: 6 },
 				}}>
 				<Box sx={{ maxWidth: 1080, mx: 'auto' }}>
 					<MenuListsProvider>

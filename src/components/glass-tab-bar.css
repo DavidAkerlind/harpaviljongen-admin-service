@@ -1,0 +1,121 @@
+/* GlassTabBar: the phone's bar at the bottom. White liquid glass with light edges (the
+   inset highlights), the items share the width, and the current one sits on a soft pill. */
+.glass-tab-bar {
+	position: relative;
+	width: min(calc(100vw - 24px), 440px);
+	touch-action: none;
+	user-select: none;
+	-webkit-user-select: none;
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* Both kinds of glass: a white edge lit from the top left, and a soft shadow under it */
+.glass-tab-bar .glass-tab-bar__glass {
+	box-shadow:
+		inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+		inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.8),
+		inset -1.5px -1.5px 2px rgba(255, 255, 255, 0.5),
+		inset 0 0 20px rgba(255, 255, 255, 0.25),
+		0 10px 30px rgba(6, 52, 36, 0.14),
+		0 2px 8px rgba(6, 52, 36, 0.08);
+}
+
+/* Where the page can be bent (Chrome): a gentle bend at the edges, frosted like iOS so the
+   icons stay easy to read over text */
+.glass-tab-bar .glass-tab-bar__glass.glass-surface--svg {
+	backdrop-filter: var(--filter-id) blur(8px) saturate(var(--glass-saturation, 1.8));
+}
+
+/* Frosted glass where the page can't be bent (Safari and so every iPhone browser, Firefox) */
+.glass-tab-bar .glass-tab-bar__glass.glass-surface--fallback {
+	background: rgba(255, 255, 255, 0.7);
+	-webkit-backdrop-filter: blur(20px) saturate(1.8);
+	backdrop-filter: blur(20px) saturate(1.8);
+	border: 0;
+}
+
+.glass-tab-bar__items.glass-surface__content {
+	gap: 2px;
+	padding: 6px;
+}
+
+.glass-tab-bar__item {
+	position: relative;
+	flex: 1 1 0;
+	min-width: 0;
+	height: 100%;
+	display: grid;
+	place-items: center;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 999px;
+	background: none;
+	color: #232825;
+	font: inherit;
+	text-decoration: none;
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.glass-tab-bar__item--active {
+	color: #063424;
+}
+
+.glass-tab-bar__item:focus-visible {
+	outline: 2px solid #063424;
+	outline-offset: -2px;
+}
+
+.glass-tab-bar__pill {
+	position: absolute;
+	inset: 0;
+	border-radius: 999px;
+	background: rgba(20, 30, 25, 0.075);
+	box-shadow:
+		inset 0 0 0 0.5px rgba(255, 255, 255, 0.5),
+		inset 1px 1px 1px rgba(255, 255, 255, 0.45);
+}
+
+.glass-tab-bar__icon {
+	position: relative;
+	display: grid;
+	place-items: center;
+	transition: transform 0.18s ease;
+}
+
+.glass-tab-bar__icon svg {
+	display: block;
+	width: 24px;
+	height: 24px;
+	font-size: 24px;
+}
+
+.glass-tab-bar__item:active .glass-tab-bar__icon {
+	transform: scale(0.9);
+}
+
+.glass-tab-bar__label {
+	position: absolute;
+	bottom: calc(100% + 10px);
+	translate: -50% 0;
+	padding: 5px 12px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.85);
+	-webkit-backdrop-filter: blur(12px) saturate(1.8);
+	backdrop-filter: blur(12px) saturate(1.8);
+	box-shadow:
+		inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+		0 6px 18px rgba(6, 52, 36, 0.14);
+	color: #063424;
+	font-size: 13px;
+	font-weight: 600;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.glass-tab-bar__icon {
+		transition: none;
+	}
+}

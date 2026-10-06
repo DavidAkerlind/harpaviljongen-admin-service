@@ -16,7 +16,7 @@ It covers what the restaurant actually updates:
 | **Min profil** (`/profil`) | Everyone. Profile picture (cropped to a square in the browser before upload), display name, username, password. Opened from your name at the bottom of the sidebar (on phones: your picture top right). |
 | **Byt lösenord** | Also directly in that menu. Your other devices are logged out. |
 
-On phones the dock at the bottom has Startbild and **Mer** on the left, Översikt as the big round home button in the middle, and Menyer and Öppettider on the right; **Mer** opens Statistik, Sidor, Logg and (for admins) Användare. Slide a finger along the dock to magnify it and see the names; lift it to open that page.
+On phones the bar at the bottom is liquid glass like iOS: Översikt (the house), Öppettider, Menyer, Startbild and **Mer**, which opens Statistik, Sidor, Logg and (for admins) Användare. The current page sits on a soft pill that slides to the next one. Slide a finger along the bar to move the pill and see the names; lift it to open that page. The glass bends the page at its edges in Chrome-based browsers and is frosted in Safari (so on every iPhone) and Firefox.
 
 After every save a toast confirms it at the bottom (a red one if it failed). It closes by itself after a few seconds; swipe it down to close it sooner.
 
@@ -27,7 +27,7 @@ The API has more endpoints (menu items, events, wine lists) that this admin deli
 
 ## Tech
 
-React 19, Vite, MUI 7, React Router, Axios, dnd-kit (dragging widgets), Motion (animations). The charts are small SVG components (`components/charts`), no chart library. From [React Bits](https://reactbits.dev) (`components/reactbits`, JS-CSS variants, in the admin's colours): *SwipeToast* (the toasts, `Notifications.jsx`), *RubberSegment* (the switches on Menyer, Statistik and Startbild, via `Segment.jsx`) and *Dock* (the bar at the bottom on phones). Swedish UI, light theme in the restaurant's green. Works on phones (dock at the bottom) and desktop (sidebar).
+React 19, Vite, MUI 7, React Router, Axios, dnd-kit (dragging widgets), Motion (animations). The charts are small SVG components (`components/charts`), no chart library. From [React Bits](https://reactbits.dev) (`components/reactbits`, JS-CSS variants, in the admin's colours): *SwipeToast* (the toasts, `Notifications.jsx`), *RubberSegment* (the switches on Menyer, Statistik and Startbild, via `Segment.jsx`) and *GlassSurface* (the liquid glass of the bar at the bottom on phones, `GlassTabBar.jsx`). Swedish UI, light theme in the restaurant's green. Works on phones (glass bar at the bottom) and desktop (sidebar).
 
 ## Run locally
 
@@ -69,8 +69,9 @@ src/
   api/          client.js (axios + token), index.js (all API calls)
   auth/         AuthContext.jsx (login, logout, token check, isAdmin)
   menus/        MenuListsContext.jsx (the menus, shared by all pages)
-  components/   AppLayout, PageHeader, ConfirmDialog, Notifications (toasts), Segment, UserAvatar, PasswordDialog,
-                reactbits/* (SwipeToast, RubberSegment, Dock from React Bits),
+  components/   AppLayout, GlassTabBar (phone bar), PageHeader, ConfirmDialog, Notifications (toasts), Segment,
+                UserAvatar, PasswordDialog,
+                reactbits/* (SwipeToast, RubberSegment, GlassSurface from React Bits),
                 dashboard/* (widgets, registry.js = which widgets exist + layout), charts/*, menus/*,
                 activity/*, pdf/*, users/*, hero/* (Startbild: photo cards, focus dialog, settings)
   pages/        OverviewPage, StatisticsPage, ActivityPage, MenusPage, OpeningHoursPage, PagesPage,
